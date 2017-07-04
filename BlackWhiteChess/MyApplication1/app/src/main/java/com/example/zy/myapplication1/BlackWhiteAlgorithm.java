@@ -177,6 +177,11 @@ public class BlackWhiteAlgorithm {
             }
         }
         computer_result = StartAnalyzeChessForComputer(blockstatus);
+        if (sc[computer_result.row][computer_result.col].Weight == WEIGHT_LEVEL7 || sc[computer_result.row][computer_result.col].Weight == WEIGHT_LEVEL6)
+        {
+            computer_result = GetBestChessPlace(blockstatus);
+            return computer_result;
+        }
         if (computer_result.result == -1)
         {
             computer_result = GetBestChessPlace(blockstatus);
