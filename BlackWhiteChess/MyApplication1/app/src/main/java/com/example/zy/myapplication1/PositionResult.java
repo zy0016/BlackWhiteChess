@@ -8,5 +8,6 @@ public class PositionResult {
     public int col;
     public int row;
     public int result;
+    public int weight;
     public String Text;
 }
