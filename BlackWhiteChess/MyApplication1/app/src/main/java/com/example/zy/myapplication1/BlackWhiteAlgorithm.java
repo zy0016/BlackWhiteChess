@@ -133,18 +133,26 @@ public class BlackWhiteAlgorithm {
     }
     public PositionResult GetBestChessPlaceAfterAnalyze(Chessman.ChessmanType blockstatus)
     {
-        boolean bUseCheckWeightFunction = false;
-        PositionResult computer_result = AnalyzeWeightBalance(blockstatus);
-        int row = computer_result.row;
-        int col = computer_result.col;
+        PositionResult result_weight = AnalyzeWeightBalance(blockstatus);
+        int row = result_weight.row;
+        int col = result_weight.col;
         if (sc[row][col].Weight == WEIGHT_MAX)
         {
-            computer_result.Text = "WEIGHT_MAX firstly";
-            return computer_result;
+            result_weight.Text = "Find WEIGHT_MAX";
+            return result_weight;
+        }
+        PositionResult result_edge = AnalyzeEdgeStatus(blockstatus);
+        if (result_edge.result != -1)
+        {
+            result_edge.Text = "AnalyzeEdgeStatus";
+            return result_edge;
         }
         if (sc[row][col].Weight == WEIGHT_LEVEL1 || sc[row][col].Weight == WEIGHT_LEVEL2)
         {
-            if (computer_result.row == 0 || computer_result.row == BlockNum - 1)
+            result_weight.Text = "Find WEIGHT_LEVEL1/WEIGHT_LEVEL2";
+            return result_weight;
+            //boolean bUseCheckWeightFunction = false;
+            /*if (row == 0 || row == BlockNum - 1)
             {
                 if (blockstatus == Chessman.ChessmanType.WHITE)//computer is white
                 {
@@ -157,7 +165,7 @@ public class BlackWhiteAlgorithm {
                                                  (sc[row][col + 1].ct == Chessman.ChessmanType.NONE && sc[row][col - 1].ct == Chessman.ChessmanType.WHITE)));
                 }
             }
-            else if (computer_result.col == 0 || computer_result.col == BlockNum - 1)
+            else if (col == 0 || col == BlockNum - 1)
             {
                 if (blockstatus == Chessman.ChessmanType.WHITE)//computer is white
                 {
@@ -174,39 +182,72 @@ public class BlackWhiteAlgorithm {
             {
                 computer_result.Text = "Use AnalyzeWeightBalance";
                 return computer_result;
+            }*/
             }
-        }
-        computer_result = AnalyzeAlphaBeta(blockstatus);
-        if (sc[row][col].Weight == WEIGHT_LEVEL7 || sc[row][col].Weight == WEIGHT_LEVEL6)
+        PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
+        if (result_alphabeta.result == -1 || sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL7 || sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL6)
         {
-            computer_result = AnalyzeWeightBalance(blockstatus);
-            computer_result.Text = "WEIGHT_LEVEL6/WEIGHT_LEVEL7";
-            return computer_result;
+            result_weight.Text = (result_alphabeta.result == -1) ? "AnalyzeAlphaBeta=-1" : "AnalyzeWeightBalance";
+            return result_weight;
         }
-        if (computer_result.result == -1)
+        result_alphabeta.Text = "Use AnalyzeAlphaBeta";
+        return result_alphabeta;
+        }
+
+    public PositionResult AnalyzeEdgeStatus(Chessman.ChessmanType blockstatus)
+    {
+        Chessman.ChessmanType checkedblock = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        PositionResult result = new PositionResult();
+        result.result = -1;
+        UpdateCanTurnChessCountStatus();
+        for (int row = 0;row < BlockNum;row++)
         {
-            computer_result = AnalyzeWeightBalance(blockstatus);
-            computer_result.Text = "Analyze fail,Use AnalyzeWeightBalance";
-        }
-        else
+            for (int col = 0;col < BlockNum;col++)
         {
-            computer_result.Text = "Use AnalyzeAlphaBeta";
+                if (sc[row][col].Weight == WEIGHT_LEVEL1 || sc[row][col].Weight == WEIGHT_LEVEL2)
+                {
+                    if (row == 0 || row == BlockNum - 1)
+                    {
+                        int ileft = GetCanTurnChessNumToDirect(blockstatus,col - 1,row,DIRECTION_LEFT);
+                        int iright = GetCanTurnChessNumToDirect(blockstatus,col + 1,row,DIRECTION_RIGHT);
+                        if (ileft > 0 || iright > 0)
+                        {
+                            result.col = col;
+                            result.row = row;
+                            result.result = ileft + iright;
+                            return result;
+                        }
         }
-        return computer_result;
+                    if (col == 0 || col == BlockNum - 1)
+        {
+                        int iup = GetCanTurnChessNumToDirect(blockstatus,col,row - 1,DIRECTION_UP);
+                        int idown = GetCanTurnChessNumToDirect(blockstatus,col,row + 1,DIRECTION_DOWN);
+                        if (iup > 0 || idown > 0)
+                        {
+                            result.col = col;
+                            result.row = row;
+                            result.result = iup + idown;
+                            return result;
+                        }
+                    }
+                }
+        }
+        }
+        return result;
     }
+
     //1:find the best place for blockstatus
     //0:can't put chess for current cycle.
     public PositionResult AnalyzeWeightBalance(Chessman.ChessmanType blockstatus)
     {
-        int i,row,col;
         PositionResult result = new PositionResult();
         result.result = -1;
         UpdateCanTurnChessCountStatus();
-        for (i = 0;i < BlockCount;i++)
+        for (int i = 0;i < BlockCount;i++)
         {
             //get coordinate of chess block
-            row = CWP[i].row;
-            col = CWP[i].col;
+            int row = CWP[i].row;
+            int col = CWP[i].col;
             if ((blockstatus == Chessman.ChessmanType.BLACK && sc[row][col].iWinChessNum_Black != 0) ||
                     (blockstatus == Chessman.ChessmanType.WHITE && sc[row][col].iWinChessNum_White != 0))
             {
@@ -292,7 +333,6 @@ public class BlackWhiteAlgorithm {
                         result_computer.row = row;
                         result_computer.col = col;
                         result_computer.result = computer_count - people_count;
-                        result_computer.weight = sc[row][col].Weight;
                         resultlist.add(result_computer);
                     }
                 }
@@ -300,7 +340,7 @@ public class BlackWhiteAlgorithm {
         }
         for (int i = 0;i < resultlist.size();i++)
         {
-            if (resultlist.get(i).weight > result.weight)
+            if (resultlist.get(i).result > result.result)
             {
                 result.result = resultlist.get(i).result;
                 result.row = resultlist.get(i).row;
@@ -308,12 +348,10 @@ public class BlackWhiteAlgorithm {
             }
         }
         RestoreChessman();
-        if (result.result == -1)
-        {
-            result = AnalyzeWeightBalance(computer_side);
-        }
         return result;
     }
+
+
 
     private int UpdateCanTurnChessCountStatus()
     {
