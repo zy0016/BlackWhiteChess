@@ -215,7 +215,7 @@ public class GameView extends View {
             Current_Player = CURRENT_PLAYER.PEOPLE;
             return;
         }
-        computerchess = bwAlgorithm.AnalyzeAlphaBeta(Computer_Role);
+        computerchess = bwAlgorithm.GetBestChessPlaceAfterAnalyze(Computer_Role);
         if (computerchess.Text != null && computerchess.Text.length() > 0)
         {
             debugtext = computerchess.Text;

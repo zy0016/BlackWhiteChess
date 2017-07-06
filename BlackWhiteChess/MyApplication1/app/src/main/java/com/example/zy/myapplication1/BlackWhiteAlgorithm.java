@@ -71,7 +71,6 @@ public class BlackWhiteAlgorithm {
             return ((chesstype == Chessman.ChessmanType.BLACK && sc[row][col].iWinChessNum_Black > 0) || (chesstype == Chessman.ChessmanType.WHITE && sc[row][col].iWinChessNum_White > 0));
     }
 
-
     //1:can put chess for current player
     //0:can NOT put chess for current player
     public boolean IfCanPutChessForPlayer(Chessman.ChessmanType blockstatus)
@@ -131,8 +130,10 @@ public class BlackWhiteAlgorithm {
         p.result = count;
         return p;
     }
+
     public PositionResult GetBestChessPlaceAfterAnalyze(Chessman.ChessmanType blockstatus)
     {
+        boolean bputchess = true;
         PositionResult result_weight = AnalyzeWeightBalance(blockstatus);
         int row = result_weight.row;
         int col = result_weight.col;
@@ -149,7 +150,47 @@ public class BlackWhiteAlgorithm {
         }
         if (sc[row][col].Weight == WEIGHT_LEVEL1 || sc[row][col].Weight == WEIGHT_LEVEL2)
         {
-            result_weight.Text = "Find WEIGHT_LEVEL1/WEIGHT_LEVEL2";
+            if (row == 0)
+            {
+                if (sc[row][0].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col + 1,row,DIRECTION_RIGHT) ||
+                   (sc[row][BlockNum - 1].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col - 1,row,DIRECTION_LEFT)))
+                {
+                    bputchess = false;
+                }
+            }
+            else if (row == BlockNum - 1)
+            {
+                if (sc[row][0].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col + 1,row,DIRECTION_RIGHT) ||
+                   (sc[row][BlockNum - 1].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col - 1,row,DIRECTION_LEFT)))
+                {
+                    bputchess = false;
+                }
+            }
+            if (col == 0)
+            {
+                if ((sc[0][col].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col,row + 1,DIRECTION_DOWN)) ||
+                    (sc[BlockNum - 1][col].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col,row - 1,DIRECTION_UP)))
+                {
+                    bputchess = false;
+                }
+            }
+            else if (col == BlockNum - 1)
+            {
+                if ((sc[0][col].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col,row + 1,DIRECTION_DOWN)) ||
+                    (sc[BlockNum - 1][col].ct == Chessman.ChessmanType.NONE && HaveEnemyChessInDirect(blockstatus,col,row - 1,DIRECTION_UP)))
+                {
+                    bputchess = false;
+                }
+            }
+            if (bputchess)
+            {
+                result_weight.Text = "Find WEIGHT_LEVEL1/WEIGHT_LEVEL2";
+            }
+            else
+            {
+                result_weight = AnalyzeWeightBalance(blockstatus,col,row);
+                result_weight.Text = "Except " + Integer.toString(col) + " " + Integer.toString(row);
+            }
             return result_weight;
             //boolean bUseCheckWeightFunction = false;
             /*if (row == 0 || row == BlockNum - 1)
@@ -183,59 +224,126 @@ public class BlackWhiteAlgorithm {
                 computer_result.Text = "Use AnalyzeWeightBalance";
                 return computer_result;
             }*/
-            }
+        }
         PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
-        if (result_alphabeta.result == -1 || sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL7 || sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL6)
+        if (result_alphabeta.result == -1)
         {
-            result_weight.Text = (result_alphabeta.result == -1) ? "AnalyzeAlphaBeta=-1" : "AnalyzeWeightBalance";
+            result_weight.Text = "AnalyzeAlphaBeta=-1";
             return result_weight;
         }
         result_alphabeta.Text = "Use AnalyzeAlphaBeta";
         return result_alphabeta;
+    }
+
+    private boolean HaveEnemyChessInDirect(Chessman.ChessmanType mychess,int col,int row,int direct)
+    {
+        Chessman.ChessmanType enemychess = (mychess == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        int stepcol = 0,steprow = 0;
+        if ((direct & DIRECTION_LEFT) != 0)
+        {
+            stepcol = -1;
         }
+        else if ((direct & DIRECTION_RIGHT) != 0)
+        {
+            stepcol = 1;
+        }
+        if ((direct & DIRECTION_UP) != 0)
+        {
+            steprow = -1;
+        }
+        else if ((direct & DIRECTION_DOWN) != 0)
+        {
+            steprow = 1;
+        }
+        while(sc[row][col].ct != mychess)
+        {
+            if ((col + stepcol >= 0 && col + stepcol < BlockNum) && (row + steprow >= 0 && row + steprow < BlockNum))
+            {
+                col += stepcol;
+                row += steprow;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return ((col >= 0 && col < BlockNum) && (row >= 0 && row < BlockNum) && (sc[row][col].ct == enemychess));
+    }
 
     public PositionResult AnalyzeEdgeStatus(Chessman.ChessmanType blockstatus)
     {
-        Chessman.ChessmanType checkedblock = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        Chessman.ChessmanType emptyside = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
         PositionResult result = new PositionResult();
         result.result = -1;
         UpdateCanTurnChessCountStatus();
-        for (int row = 0;row < BlockNum;row++)
+        for (int col = 1;col < BlockNum - 1;col++)
         {
-            for (int col = 0;col < BlockNum;col++)
-        {
-                if (sc[row][col].Weight == WEIGHT_LEVEL1 || sc[row][col].Weight == WEIGHT_LEVEL2)
+            if (sc[0][col].ct == Chessman.ChessmanType.NONE)
+            {
+                int toplineleft = GetCanTurnChessNumToDirect(blockstatus,col - 1,0,DIRECTION_LEFT);
+                int toplineright = GetCanTurnChessNumToDirect(blockstatus,col + 1,0,DIRECTION_RIGHT);
+                if ((toplineleft > 0 && sc[0][0].ct == blockstatus) ||
+                    (toplineright > 0 && sc[0][BlockNum - 1].ct == blockstatus) ||
+                   ((toplineleft > 0 || toplineright > 0) && sc[0][0].ct == Chessman.ChessmanType.NONE && sc[0][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
+                    )
                 {
-                    if (row == 0 || row == BlockNum - 1)
-                    {
-                        int ileft = GetCanTurnChessNumToDirect(blockstatus,col - 1,row,DIRECTION_LEFT);
-                        int iright = GetCanTurnChessNumToDirect(blockstatus,col + 1,row,DIRECTION_RIGHT);
-                        if (ileft > 0 || iright > 0)
-                        {
-                            result.col = col;
-                            result.row = row;
-                            result.result = ileft + iright;
-                            return result;
-                        }
-        }
-                    if (col == 0 || col == BlockNum - 1)
-        {
-                        int iup = GetCanTurnChessNumToDirect(blockstatus,col,row - 1,DIRECTION_UP);
-                        int idown = GetCanTurnChessNumToDirect(blockstatus,col,row + 1,DIRECTION_DOWN);
-                        if (iup > 0 || idown > 0)
-                        {
-                            result.col = col;
-                            result.row = row;
-                            result.result = iup + idown;
-                            return result;
-                        }
-                    }
+                    result.col = col;
+                    result.row = 0;
+                    result.result = toplineleft + toplineright;
+                    return result;
                 }
+            }
+            if (sc[BlockNum - 1][col].ct == Chessman.ChessmanType.NONE)
+            {
+                int bottomlinelet = GetCanTurnChessNumToDirect(blockstatus,col - 1,BlockNum - 1,DIRECTION_LEFT);
+                int bottomlineright = GetCanTurnChessNumToDirect(blockstatus,col + 1,BlockNum - 1,DIRECTION_RIGHT);
+                if ((bottomlinelet > 0 && sc[BlockNum - 1][0].ct == blockstatus) ||
+                    (bottomlineright > 0 && sc[BlockNum - 1][BlockNum - 1].ct == blockstatus) ||
+                   ((bottomlinelet > 0 || bottomlineright > 0) && sc[BlockNum - 1][0].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
+                        )
+                {
+                    result.col = col;
+                    result.row = BlockNum - 1;
+                    result.result = bottomlinelet + bottomlineright;
+                    return result;
+                }
+            }
         }
+        for (int row = 1;row < BlockNum - 1;row++)
+        {
+            if (sc[row][0].ct == Chessman.ChessmanType.NONE)
+            {
+                int leftlineup = GetCanTurnChessNumToDirect(blockstatus,0,row - 1,DIRECTION_UP);
+                int leftlinedown = GetCanTurnChessNumToDirect(blockstatus,0,row + 1,DIRECTION_DOWN);
+                if ((leftlineup > 0 && sc[0][0].ct == blockstatus) ||
+                    (leftlinedown > 0 && sc[BlockNum - 1][0].ct == blockstatus) ||
+                   ((leftlineup > 0 || leftlinedown > 0) && sc[0][0].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][0].ct == Chessman.ChessmanType.NONE)
+                        )
+                {
+                    result.col = 0;
+                    result.row = row;
+                    result.result = leftlineup + leftlinedown;
+                    return result;
+                }
+            }
+            if (sc[row][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
+            {
+                int rightlineup = GetCanTurnChessNumToDirect(blockstatus,BlockNum - 1,row - 1,DIRECTION_UP);
+                int rightlinedown = GetCanTurnChessNumToDirect(blockstatus,BlockNum - 1,row + 1,DIRECTION_DOWN);
+                if ((rightlineup > 0 && sc[0][BlockNum - 1].ct == blockstatus) ||
+                    (rightlinedown > 0 && sc[BlockNum - 1][BlockNum - 1].ct == blockstatus) ||
+                   ((rightlineup > 0 || rightlinedown > 0) && sc[0][BlockNum - 1].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
+                        )
+                {
+                    result.col = BlockNum - 1;
+                    result.row = row;
+                    result.result = rightlineup + rightlinedown;
+                    return result;
+                }
+            }
         }
         return result;
     }
-
     //1:find the best place for blockstatus
     //0:can't put chess for current cycle.
     public PositionResult AnalyzeWeightBalance(Chessman.ChessmanType blockstatus)
@@ -269,7 +377,41 @@ public class BlackWhiteAlgorithm {
         }
         return result;
     }
-
+    //1:find the best place for blockstatus
+    //0:can't put chess for current cycle.
+    public PositionResult AnalyzeWeightBalance(Chessman.ChessmanType blockstatus,int colexcept,int rowexcept)
+    {
+        PositionResult result = new PositionResult();
+        result.result = -1;
+        UpdateCanTurnChessCountStatus();
+        for (int i = 0;i < BlockCount;i++)
+        {
+            //get coordinate of chess block
+            int row = CWP[i].row;
+            int col = CWP[i].col;
+            if (row == rowexcept && col == colexcept)
+                continue;
+            if ((blockstatus == Chessman.ChessmanType.BLACK && sc[row][col].iWinChessNum_Black != 0) ||
+                    (blockstatus == Chessman.ChessmanType.WHITE && sc[row][col].iWinChessNum_White != 0))
+            {
+                result = GetPositionFromSameWeight(blockstatus,sc[row][col].Weight);
+                if (result.result > 0)
+                {
+                    return result;
+                }
+            }
+        }
+        if (!IfCanPutChessForPlayer(blockstatus))//game over for white or black in this cycle
+        {
+            result.result = -1;
+            return result;
+        }
+        else
+        {
+            System.exit(0);
+        }
+        return result;
+    }
     public PositionResult AnalyzeAlphaBeta(Chessman.ChessmanType blockstatus)
     {
         PositionResult result = new PositionResult();
@@ -351,9 +493,7 @@ public class BlackWhiteAlgorithm {
         return result;
     }
 
-
-
-    private int UpdateCanTurnChessCountStatus()
+    private void UpdateCanTurnChessCountStatus()
     {
         UpdateCWPWeightStatus();
         for (int row = 0;row < BlockNum;row++)
@@ -364,7 +504,6 @@ public class BlackWhiteAlgorithm {
                 sc[row][col].iWinChessNum_White = GetCanTurnChessNumAll(Chessman.ChessmanType.WHITE,col,row);
             }
         }
-        return 1;
     }
     private int GetCanTurnChessNumAll(Chessman.ChessmanType blockstatus,int col,int row)
     {
