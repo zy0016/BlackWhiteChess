@@ -30,13 +30,14 @@ public class GameView extends View {
         minute = 0;
         ComputerTurnChessCount = 0;
         PeopleTurnChessCount = 0;
-        InitHandler();
+
         initGameView(context);
-        InitChessGrid();
+
         bwAlgorithm = new BlackWhiteAlgorithm(chessman,BlockNum);
         if (Current_Player == CURRENT_PLAYER.COMPUTER)
         {
             ComputerRun();
+            StartGameTimer();
         }
     }
 
@@ -46,6 +47,12 @@ public class GameView extends View {
     }
 
     private void initGameView(Context context)
+    {
+        InitHandler();
+        InitPicture();
+        InitChessGrid();
+    }
+    private void InitPicture()
     {
         bitmap_black = BitmapFactory.decodeResource(getResources(),R.drawable.chess_black);
         bitmap_white = BitmapFactory.decodeResource(getResources(),R.drawable.chess_white);
@@ -105,8 +112,10 @@ public class GameView extends View {
                 DrawChessAgain();
                 return true;
             }
+            StartGameTimer();
             int x = Math.round(event.getX());
             int y = Math.round(event.getY());
+            PositionResult userchess = new PositionResult();
             userchess = GetChessRowCol(x,y);
             if (userchess.col != -1 && userchess.row != -1)
             {
@@ -134,26 +143,6 @@ public class GameView extends View {
                 }
             }
         }
-        /*else if (event.getAction() == MotionEvent.ACTION_UP)
-        {
-            if (Current_Player == CURRENT_PLAYER.COMPUTER)
-            {
-                if (bwAlgorithm.CalculateChessCount(Computer_Role) == 0)
-                {
-                    //prompt a note.
-                    DrawChessAgain();
-                    return true;
-                }
-                if (!bwAlgorithm.IfCanPutChessForPlayer(Computer_Role))
-                {
-                    //prompt a note.
-                    Current_Player = CURRENT_PLAYER.PEOPLE;
-                    DrawChessAgain();
-                    return true;
-                }
-                ComputerRun();
-            }
-        }*/
         DrawChessAgain();
         return true;
     }
@@ -201,7 +190,57 @@ public class GameView extends View {
                 }
             }
         };
+        //////////////
+        handler_time = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == 1)
+                {
+                    if (second < 59)
+                    {
+                        second++;
+                    }
+                    else
+                    {
+                        second = 0;
+                        if (minute < 59)
+                        {
+                            minute++;
+                        }
+                        else
+                        {
+                            second = 0;
+                            minute = 0;
+                        }
+                    }
+                    DrawChessAgain();
+                }
+            }
+        };
     }
+
+    private void StopGameTimer()
+    {
+        if (timer_game != null)
+            timer_game.cancel();
+    }
+    private void StartGameTimer()
+    {
+        if (timer_game != null)
+            return;
+        timer_game = new Timer();
+        timer_game.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    Message message = new Message();
+                                    message.what = 1;
+                                    handler_time.sendMessage(message);
+                                }
+                            }
+                , 2000, 1000);
+    }
+
     private void ComputerRun()
     {
         flashnum = 0;
@@ -269,6 +308,7 @@ public class GameView extends View {
         String txt = "";
         if (bwAlgorithm.IfGameOver())
         {
+            StopGameTimer();
             txt = "Game over,";
             int black_count = bwAlgorithm.CalculateChessCount(Chessman.ChessmanType.BLACK);
             int white_count = bwAlgorithm.CalculateChessCount(Chessman.ChessmanType.WHITE);
@@ -293,7 +333,7 @@ public class GameView extends View {
         }
         else
         {
-            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? "Computer is playing" + debugtext: "People is playing";
+            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? "Computer is playing" : "People is playing";
         }
         canvas.drawText(txt,text_debug_data_x,text_debug_data_y,paint);
     }
@@ -301,7 +341,6 @@ public class GameView extends View {
     {
         Paint paint = new Paint();
         paint.setTextSize(20);
-        //CheckWeightPositon[] cwp = bwAlgorithm.GetCWP();
         for (int row = 0;row < BlockNum;row++)
         {
             for (int col = 0;col < BlockNum;col++)
@@ -312,12 +351,6 @@ public class GameView extends View {
                 }
                 else
                 {
-                    /*int row_cwp = cwp[row * BlockNum + col].row;
-                    int col_cwp = cwp[row * BlockNum + col].col;
-                    int weight = cwp[row * BlockNum + col].BlockWeight;
-                    String res = Integer.toString(row_cwp) + ":" + Integer.toString(col_cwp);
-                    canvas.drawText(res,chessman[row][col].x,chessman[row][col].y + 15,paint);
-                    canvas.drawText(Integer.toString(weight),chessman[row][col].x,chessman[row][col].y + 30,paint);*/
                     if (chessman[row][col].ct != Chessman.ChessmanType.NONE)
                     {
                         switch (chessman[row][col].ct)
@@ -417,15 +450,15 @@ public class GameView extends View {
     private final int BlockNum = 8;
     private final int BlockCount = (BlockNum * BlockNum);
     private final int hx_grid = 20;
-    private final int hy_grid = 120;
+    private final int hy_grid = 140;
     private final int text_timer_x = 20;
-    private final int text_timer_y = 20;
+    private final int text_timer_y = 40;
     private final int text_turned_x = 80;
-    private final int text_turned_y= 20;
+    private final int text_turned_y= 40;
     private final int text_chess_data_x = 20;
-    private final int text_chess_data_y = 50;
+    private final int text_chess_data_y = 70;
     private final int text_debug_data_x = 20;
-    private final int text_debug_data_y = 80;
+    private final int text_debug_data_y = 100;
     private String debugtext = "";
     private int bh = 0;
     private int bw = bh;
@@ -433,8 +466,9 @@ public class GameView extends View {
     private int ComputerTurnChessCount = 0;
     private int PeopleTurnChessCount = 0;
     private Handler handler_computer;
+    private Handler handler_time;
     private Timer timer_computer;
-    private PositionResult userchess = new PositionResult();
+    private Timer timer_game;
     private PositionResult computerchess = new PositionResult();
     private Bitmap bitmap_black = null;
     private Bitmap bitmap_white = null;

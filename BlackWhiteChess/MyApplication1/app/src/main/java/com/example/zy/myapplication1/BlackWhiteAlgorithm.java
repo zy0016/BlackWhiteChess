@@ -28,14 +28,14 @@ public class BlackWhiteAlgorithm {
     public enum DIRECTION {ROW,COL};
     private final int[][] ChessPositionWeight =
             {
-                    {100,	-5,		10,		5,		5,		10,		-5,		100},
+                    {100,	-5,		10,		10,		10,		10,		-5,		100},
                     { -5,	-45,	1,		1,		1,		1,		-45,	-5},
                     { 10,	1,		3,		2,		2,		3,		1,		10},
-                    { 5,	1,		2,		1,		1,		2,		1,		5},
-                    { 5,	1,		2,		1,		1,		2,		1,		5},
+                    { 10,	1,		2,		1,		1,		2,		1,		10},
+                    { 10,	1,		2,		1,		1,		2,		1,		10},
                     { 10,	1,		3,		2,		2,		3,		1,		10},
                     { -5,	-45,	1,		1,		1,		1,		-45,	-5},
-                    {100,	-5,		10,		5,		5,		10,		-5,		100}
+                    {100,	-5,		10,		10,		10,		10,		-5,		100}
             };
     public BlackWhiteAlgorithm(Chessman[][] chessman,int blocknum)
     {
@@ -192,38 +192,6 @@ public class BlackWhiteAlgorithm {
                 result_weight.Text = "Except " + Integer.toString(col) + " " + Integer.toString(row);
             }
             return result_weight;
-            //boolean bUseCheckWeightFunction = false;
-            /*if (row == 0 || row == BlockNum - 1)
-            {
-                if (blockstatus == Chessman.ChessmanType.WHITE)//computer is white
-                {
-                    bUseCheckWeightFunction = (!((sc[row][col - 1].ct == Chessman.ChessmanType.NONE && sc[row][col + 1].ct == Chessman.ChessmanType.BLACK) ||
-                                                 (sc[row][col + 1].ct == Chessman.ChessmanType.NONE && sc[row][col - 1].ct == Chessman.ChessmanType.BLACK)));
-                }
-                else//computer is black
-                {
-                    bUseCheckWeightFunction = (!((sc[row][col - 1].ct == Chessman.ChessmanType.NONE && sc[row][col + 1].ct == Chessman.ChessmanType.WHITE) ||
-                                                 (sc[row][col + 1].ct == Chessman.ChessmanType.NONE && sc[row][col - 1].ct == Chessman.ChessmanType.WHITE)));
-                }
-            }
-            else if (col == 0 || col == BlockNum - 1)
-            {
-                if (blockstatus == Chessman.ChessmanType.WHITE)//computer is white
-                {
-                    bUseCheckWeightFunction = (!((sc[row - 1][col].ct == Chessman.ChessmanType.NONE && sc[row + 1][col].ct == Chessman.ChessmanType.BLACK) ||
-                                                 (sc[row + 1][col].ct == Chessman.ChessmanType.NONE && sc[row - 1][col].ct == Chessman.ChessmanType.BLACK)));
-                }
-                else//computer is black
-                {
-                    bUseCheckWeightFunction = (!((sc[row - 1][col].ct == Chessman.ChessmanType.NONE && sc[row + 1][col].ct == Chessman.ChessmanType.WHITE) ||
-                                                 (sc[row + 1][col].ct == Chessman.ChessmanType.NONE && sc[row - 1][col].ct == Chessman.ChessmanType.WHITE)));
-                }
-            }
-            if (bUseCheckWeightFunction)
-            {
-                computer_result.Text = "Use AnalyzeWeightBalance";
-                return computer_result;
-            }*/
         }
         PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
         if (result_alphabeta.result == -1)
@@ -872,27 +840,6 @@ public class BlackWhiteAlgorithm {
                     UpdateWeight = 1;
                 }
             }
-            /*if (sc[row][col].ct == Chessman.ChessmanType.NONE && (CWP[i].BlockWeight == WEIGHT_LEVEL1 || CWP[i].BlockWeight == WEIGHT_LEVEL2))
-            {
-                if ((row == 0 || row == BlockNum - 1) && (col != 0 && col != BlockNum - 1))
-                {
-                    if (sc[row][col - 1].ct != Chessman.ChessmanType.NONE || sc[row][col + 1].ct != Chessman.ChessmanType.NONE)
-                    {
-                        CWP[i].BlockWeight = WEIGHT_LEVEL6;
-                        sc[row][col].Weight = WEIGHT_LEVEL6;
-                        UpdateWeight = 1;
-                    }
-                }
-                if (col == 0 || col == BlockNum)
-                {
-                    if (sc[row - 1][col].ct != Chessman.ChessmanType.NONE || sc[row + 1][col].ct != Chessman.ChessmanType.NONE)
-                    {
-                        CWP[i].BlockWeight = WEIGHT_LEVEL6;
-                        sc[row][col].Weight = WEIGHT_LEVEL6;
-                        UpdateWeight = 1;
-                    }
-                }
-            }*/
         }
         if (UpdateWeight == 1)
         {
@@ -987,18 +934,5 @@ public class BlackWhiteAlgorithm {
                 arraycwp[j + 1].BlockWeight = temp.BlockWeight;
             }
         }
-        /*for (i = 1; i < nNum; ++i)
-        {
-            if (arraycwp[i].BlockWeight > arraycwp[i - 1].BlockWeight)
-            {
-                memcpy(&temp,&arraycwp[i],sizeof(CheckWeightPositon));
-                memcpy(&arraycwp[i],&arraycwp[i - 1],sizeof(CheckWeightPositon));
-                for (j = i - 1;j >= 0 && temp.BlockWeight > arraycwp[j].BlockWeight; --j)
-                {
-                    memcpy(&arraycwp[j + 1],&arraycwp[j],sizeof(CheckWeightPositon));
-                }
-                memcpy(&arraycwp[j + 1],&temp,sizeof(CheckWeightPositon));
-            }
-        }*/
     }
 }
