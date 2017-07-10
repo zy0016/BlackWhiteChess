@@ -2,4 +2,12 @@
     <string name="app_name">BlackWhiteChess</string>
     <string name="action_settings">Settings</string>
     <string name="no_ready_settings">Sorry,not ready!</string>
+    <string name="first_run">Computer run firstly or you run firstly?</string>
+    <string name="computer_first_run">Computer run firstly</string>
+    <string name="people_first_run">People run firstly</string>
+    <string name="exit">Exit game?</string>
+    <string name="clew">Clew</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="exit_current_game">End current game?</string>
 </resources>

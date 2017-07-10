@@ -41,6 +41,10 @@ public class GameView extends View {
         }
     }
 
+    public boolean IfGameOver()
+    {
+        return bwAlgorithm.IfGameOver();
+    }
     private void DrawChessAgain()
     {
         this.postInvalidate();
@@ -333,7 +337,7 @@ public class GameView extends View {
         }
         else
         {
-            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? "Computer is playing" : "People is playing";
+            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? "Computer is playing " + debugtext: "People is playing";
         }
         canvas.drawText(txt,text_debug_data_x,text_debug_data_y,paint);
     }

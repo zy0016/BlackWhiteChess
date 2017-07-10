@@ -194,13 +194,19 @@ public class BlackWhiteAlgorithm {
             return result_weight;
         }
         PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
-        if (result_alphabeta.result == -1)
+        if (result_alphabeta.result > 0 &&
+                sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL3 ||
+                sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL4 ||
+                sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL5)
         {
-            result_weight.Text = "AnalyzeAlphaBeta=-1";
+            result_alphabeta.Text = "Use AnalyzeAlphaBeta";
+            return result_alphabeta;
+        }
+        else
+        {
+            result_weight.Text = "Use AnalyzeWeightBalance";
             return result_weight;
         }
-        result_alphabeta.Text = "Use AnalyzeAlphaBeta";
-        return result_alphabeta;
     }
 
     private boolean HaveEnemyChessInDirect(Chessman.ChessmanType mychess,int col,int row,int direct)
@@ -240,7 +246,7 @@ public class BlackWhiteAlgorithm {
 
     public PositionResult AnalyzeEdgeStatus(Chessman.ChessmanType blockstatus)
     {
-        Chessman.ChessmanType emptyside = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        //Chessman.ChessmanType emptyside = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
         PositionResult result = new PositionResult();
         result.result = -1;
         UpdateCanTurnChessCountStatus();
@@ -258,7 +264,7 @@ public class BlackWhiteAlgorithm {
                     result.col = col;
                     result.row = 0;
                     result.result = toplineleft + toplineright;
-                    return result;
+                    break;
                 }
             }
             if (sc[BlockNum - 1][col].ct == Chessman.ChessmanType.NONE)
@@ -273,7 +279,7 @@ public class BlackWhiteAlgorithm {
                     result.col = col;
                     result.row = BlockNum - 1;
                     result.result = bottomlinelet + bottomlineright;
-                    return result;
+                    break;
                 }
             }
         }
@@ -291,7 +297,7 @@ public class BlackWhiteAlgorithm {
                     result.col = 0;
                     result.row = row;
                     result.result = leftlineup + leftlinedown;
-                    return result;
+                    break;
                 }
             }
             if (sc[row][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
@@ -306,7 +312,40 @@ public class BlackWhiteAlgorithm {
                     result.col = BlockNum - 1;
                     result.row = row;
                     result.result = rightlineup + rightlinedown;
-                    return result;
+                    break;
+                }
+            }
+        }
+        if (sc[result.row][result.col].Weight == WEIGHT_LEVEL6)
+        {
+            //row
+            if ((result.row == 0 || result.row == BlockNum - 1) && result.col == 1)
+            {
+                if (sc[result.row][result.col - 1].ct == Chessman.ChessmanType.NONE && sc[result.row][result.col + 1].ct != blockstatus)
+                {
+                    result.result = -1;
+                }
+            }
+            if ((result.row == 0 || result.row == BlockNum - 1) && result.col == BlockNum - 2)
+            {
+                if (sc[result.row][result.col - 1].ct != blockstatus && sc[result.row][result.col + 1].ct == Chessman.ChessmanType.NONE)
+                {
+                    result.result = -1;
+                }
+            }
+            //col
+            if ((result.col == 0 || result.col == BlockNum - 1) && result.row == 1)
+            {
+                if (sc[result.row - 1][result.col].ct == Chessman.ChessmanType.NONE && sc[result.row + 1][result.col].ct != blockstatus)
+                {
+                    result.result = -1;
+                }
+            }
+            if ((result.col == 0 || result.col == BlockNum - 1) && result.row == BlockNum - 2)
+            {
+                if (sc[result.row - 1][result.col].ct != blockstatus && sc[result.row + 1][result.col].ct == Chessman.ChessmanType.NONE)
+                {
+                    result.result = -1;
                 }
             }
         }

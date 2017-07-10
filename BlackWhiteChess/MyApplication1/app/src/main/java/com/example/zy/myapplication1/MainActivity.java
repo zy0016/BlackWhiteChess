@@ -1,50 +1,59 @@
 package com.example.zy.myapplication1;
-
-import android.accounts.Account;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
+import android.view.View;
+import android.widget.Button;
+import android.view.View.OnClickListener;
 
 public class MainActivity extends AppCompatActivity  {
     private GameView gameView = null;
+    //private Button button_computer_first;
+    //private Button button_people_first;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //return super.onKeyDown(keyCode, event);
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0)
         {
-            ExitDialog();
+            ExitDialog((gameView != null) ? R.string.exit_current_game : R.string.exit);
         }
         return true;
     }
 
-    protected void ExitDialog()
+    protected void ExitDialog(int stringid)
     {
+        if (gameView != null && gameView.IfGameOver())
+        {
+            setContentView(R.layout.activity_chessview);
+            gameView = null;
+            return;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Exit?");
-        builder.setTitle("Clew");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setMessage(stringid);
+        builder.setTitle(R.string.clew);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
-                android.os.Process.killProcess(android.os.Process.myPid());
+                if (gameView != null)
+                {
+                    setContentView(R.layout.activity_chessview);
+                    gameView = null;
+                }
+                else
+                {
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                }
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
@@ -52,6 +61,19 @@ public class MainActivity extends AppCompatActivity  {
         });
         builder.create().show();
     }
+
+    public void computer_first_run(View view)
+    {
+        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.COMPUTER);
+        setContentView(gameView);
+    }
+
+    public void people_first_run(View view)
+    {
+        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.PEOPLE);
+        setContentView(gameView);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,14 +81,29 @@ public class MainActivity extends AppCompatActivity  {
         //LinearLayout layout = (LinearLayout)findViewById(R.id.LinearLayout1);
         //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(300,500);
         //params.setMargins(5,5,5,5);
-        if (gameView == null)
+        /*if (gameView == null)
         {
             gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.COMPUTER);
-        }
+        }*/
+        setContentView(R.layout.activity_chessview);
+        /////////////button
+        //button_computer_first = (Button)findViewById(R.id.button_computer);
+        //button_people_first = (Button)findViewById(R.id.button_people);
+        /*button_computer_first.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            }
+        });
+        button_people_first.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+            }
+        });*/
+        //button
         //setContentView(R.layout.activity_main);
-        setContentView(gameView);
-        //layout.addView(gameView);
+        //setContentView(gameView);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -123,7 +160,6 @@ public class MainActivity extends AppCompatActivity  {
         switch (id)
         {
             case Menu.FIRST + 1:
-
                 break;
             case Menu.FIRST + 2:
                 ShowPrivateDialog(R.string.no_ready_settings);
