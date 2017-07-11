@@ -16,8 +16,8 @@
     <string name="computer_win">计算机赢了</string>
     <string name="people_win">你赢了</string>
     <string name="draw">平局</string>
-    <string name="white_chess_num">白旗有:</string>
-    <string name="black_chess_num">黑旗有:</string>
+    <string name="white_chess_num">白子数:</string>
+    <string name="black_chess_num">黑子数:</string>
     <string name="people_turn">你翻了</string>
     <string name="computer_turn">计算机翻了</string>
     <string name="chess">子</string>

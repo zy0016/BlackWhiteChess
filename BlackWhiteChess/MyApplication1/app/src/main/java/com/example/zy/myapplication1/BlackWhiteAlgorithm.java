@@ -601,7 +601,6 @@ public class BlackWhiteAlgorithm {
     }
     private int GetCanTurnChessNumAll(Chessman.ChessmanType blockstatus,int col,int row)
     {
-        int result = 0;
         int[] score = new int[BlockNum];
         for (int i = 0;i < BlockNum;i++)
         {
@@ -679,13 +678,11 @@ public class BlackWhiteAlgorithm {
             score[6] = GetCanTurnChessNumToDirect(blockstatus,col + 1,row - 1,DIRECTION_RIGHT|DIRECTION_UP);
             score[7] = GetCanTurnChessNumToDirect(blockstatus,col + 1,row + 1,DIRECTION_RIGHT|DIRECTION_DOWN);
         }
-        result = ScoreSummary(score);
-        return result;
+        return ScoreSummary(score);
     }
 
     public int GetTurnChessResult(Chessman.ChessmanType blockstatus,int col,int row)
     {
-        int result = 0;
         int[] score = new int[BlockNum];
         int[] turnresult = new int[BlockNum];
         if (col == 0 && row == 0)//left top corner
@@ -796,7 +793,7 @@ public class BlackWhiteAlgorithm {
             turnresult[7] = TurnWinChessToDirect(blockstatus,col + 1,row + 1,DIRECTION_RIGHT|DIRECTION_DOWN,score[7]);
         }
         sc[row][col].ct = blockstatus;//update current position
-        if (FindInvalidValue(turnresult) == 1)
+        if (FindInvalidValue(turnresult))
         {
             //OutputChessStatus();
             return -1;
@@ -948,9 +945,9 @@ public class BlackWhiteAlgorithm {
         return iRemainChess;
     }
 
-    private int UpdateCWPWeightStatus()
+    private boolean UpdateCWPWeightStatus()
     {
-        int UpdateWeight = 0;
+        boolean UpdateWeight = false;
         int col,row;
         for (int i = 0;i < BlockCount;i++)
         {
@@ -963,26 +960,26 @@ public class BlackWhiteAlgorithm {
                 {
                     CWP[i].BlockWeight = WEIGHT_MAX;
                     sc[row][col].Weight = WEIGHT_MAX;
-                    UpdateWeight = 1;
+                    UpdateWeight = true;
                 }
             }
         }
-        if (UpdateWeight == 1)
+        if (UpdateWeight)
         {
             WeightPositionSort(CWP,BlockCount);
         }
         return UpdateWeight;
     }
-    private int FindInvalidValue(int value[])
+    private boolean FindInvalidValue(int value[])
     {
         for (int i = 0;i < value.length;i++)
         {
             if (value[i] == INVALIDVALUE)
             {
-                return 1;
+                return true;
             }
         }
-        return 0;
+        return false;
     }
     private int ScoreSummary(int score[])
     {

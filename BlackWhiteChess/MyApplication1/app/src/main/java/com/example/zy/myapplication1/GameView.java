@@ -10,7 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.graphics.Bitmap;
 import android.os.Handler;
-
+import android.media.AudioManager;
+import android.media.SoundPool;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -55,6 +56,8 @@ public class GameView extends View {
         InitHandler();
         InitPicture();
         InitChessGrid();
+        soundPool = new SoundPool(10,AudioManager.STREAM_SYSTEM,5);
+        soundPool.load(context,R.raw.notify,1);
     }
     private void InitPicture()
     {
@@ -143,6 +146,7 @@ public class GameView extends View {
                             return true;
                         }
                         ComputerRun();
+                        soundPool.play(1,3, 3, 0, 0, 1);
                     }
                 }
             }
@@ -259,10 +263,6 @@ public class GameView extends View {
             return;
         }
         computerchess = bwAlgorithm.GetBestChessPlaceAfterAnalyze(Computer_Role);
-        if (computerchess.Text != null && computerchess.Text.length() > 0)
-        {
-            debugtext = computerchess.Text;
-        }
         if (computerchess.result > 0)
         {
             timer_computer = new Timer();
@@ -285,6 +285,8 @@ public class GameView extends View {
     private PositionResult GetChessRowCol(int x,int y)
     {
         PositionResult p = new PositionResult();
+        p.col = -1;
+        p.row = -1;
         for (int row = 0;row < BlockNum;row++)
         {
             for (int col = 0;col < BlockNum;col++)
@@ -294,7 +296,7 @@ public class GameView extends View {
                     p.result = 1;
                     p.row = row;
                     p.col = col;
-                    break;
+                    return p;
                 }
             }
         }
@@ -337,7 +339,6 @@ public class GameView extends View {
         }
         else
         {
-            String s = getResources().getString(R.string.computer_first_run);
             txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? getResources().getString(R.string.computer_run): getResources().getString(R.string.people_run);
         }
         canvas.drawText(txt,text_debug_data_x,text_debug_data_y,paint);
@@ -452,7 +453,7 @@ public class GameView extends View {
 
     private int second = 0;
     private int minute = 0;
-    private final int FLASHNUM = 6;
+    private final int FLASHNUM = 4;
     private final int BlockNum = 8;
     private final int hx_grid = 20;
     private final int hy_grid = 140;
@@ -464,7 +465,6 @@ public class GameView extends View {
     private final int text_chess_data_y = 70;
     private final int text_debug_data_x = 20;
     private final int text_debug_data_y = 100;
-    private String debugtext = "";
     private int bh = 0;
     private int bw = bh;
     private int flashnum = 0;
@@ -484,4 +484,5 @@ public class GameView extends View {
     private CURRENT_PLAYER Current_Player = CURRENT_PLAYER.PEOPLE;
     private Chessman.ChessmanType Computer_Role = Chessman.ChessmanType.NONE;
     private Chessman.ChessmanType People_Role = Chessman.ChessmanType.NONE;
+    private SoundPool soundPool;
 }
