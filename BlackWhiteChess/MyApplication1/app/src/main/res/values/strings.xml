@@ -1,13 +1,24 @@
 <resources>
-    <string name="app_name">BlackWhiteChess</string>
+    <string name="app_name">黑白棋</string>
     <string name="action_settings">Settings</string>
     <string name="no_ready_settings">Sorry,not ready!</string>
-    <string name="first_run">Computer run firstly or you run firstly?</string>
-    <string name="computer_first_run">Computer run firstly</string>
-    <string name="people_first_run">People run firstly</string>
-    <string name="exit">Exit game?</string>
-    <string name="clew">Clew</string>
-    <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
-    <string name="exit_current_game">End current game?</string>
+    <string name="first_run">请选择谁先走棋？</string>
+    <string name="computer_first_run">计算机先走</string>
+    <string name="people_first_run">人先走</string>
+    <string name="exit">退出游戏?</string>
+    <string name="clew">提示</string>
+    <string name="ok">确认</string>
+    <string name="cancel">取消</string>
+    <string name="exit_current_game">退出当前对局?</string>
+    <string name="computer_run">该电脑走棋</string>
+    <string name="people_run">该你走棋</string>
+    <string name="game_over">游戏结束,</string>
+    <string name="computer_win">计算机赢了</string>
+    <string name="people_win">你赢了</string>
+    <string name="draw">平局</string>
+    <string name="white_chess_num">白旗有:</string>
+    <string name="black_chess_num">黑旗有:</string>
+    <string name="people_turn">你翻了</string>
+    <string name="computer_turn">计算机翻了</string>
+    <string name="chess">子</string>
 </resources>

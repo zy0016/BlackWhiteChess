@@ -313,31 +313,32 @@ public class GameView extends View {
         if (bwAlgorithm.IfGameOver())
         {
             StopGameTimer();
-            txt = "Game over,";
+            txt = getResources().getString(R.string.game_over);//"Game over,";
             int black_count = bwAlgorithm.CalculateChessCount(Chessman.ChessmanType.BLACK);
             int white_count = bwAlgorithm.CalculateChessCount(Chessman.ChessmanType.WHITE);
             if (Computer_Role == Chessman.ChessmanType.BLACK)
             {
                 if (black_count > white_count)
-                    txt = txt + "Computer win";
+                    txt = txt + getResources().getString(R.string.computer_win);//"Computer win";
                 else if(black_count < white_count)
-                    txt = txt + "People win";
+                    txt = txt + getResources().getString(R.string.people_win);//"People win";
                 else
-                    txt = txt + "Draw";
+                    txt = txt + getResources().getString(R.string.draw);//"Draw";
             }
             else//computer_role == Chessman.ChessmanType.WHITE
             {
                 if (white_count > black_count)
-                    txt = txt + "Computer win";
+                    txt = txt + getResources().getString(R.string.computer_win);
                 else if(white_count < black_count)
-                    txt = txt + "People win";
+                    txt = txt + getResources().getString(R.string.people_win);//"People win";
                 else
-                    txt = txt + "Draw";
+                    txt = txt + getResources().getString(R.string.draw);//"Draw";
             }
         }
         else
         {
-            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? "Computer is playing " + debugtext: "People is playing";
+            String s = getResources().getString(R.string.computer_first_run);
+            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? getResources().getString(R.string.computer_run): getResources().getString(R.string.people_run);
         }
         canvas.drawText(txt,text_debug_data_x,text_debug_data_y,paint);
     }
@@ -399,7 +400,7 @@ public class GameView extends View {
             black_count = bwAlgorithm.CalculateChessCount(Chessman.ChessmanType.BLACK);
             white_count = bwAlgorithm.CalculateChessCount(Chessman.ChessmanType.WHITE);
         }
-        result = "Black chess:" + Integer.toString(black_count) + ".White chess:" + Integer.toString(white_count);
+        result = getResources().getString(R.string.black_chess_num) + Integer.toString(black_count) + " "+ getResources().getString(R.string.white_chess_num) + Integer.toString(white_count);
         return result;
     }
     private String GetTurnedCountString()
@@ -407,17 +408,17 @@ public class GameView extends View {
         String result = "";
         if (Current_Player == CURRENT_PLAYER.COMPUTER)
         {
-            result = "People turn " + Integer.toString(PeopleTurnChessCount) + " chess.";
+            result = getResources().getString(R.string.people_turn) + Integer.toString(PeopleTurnChessCount) + getResources().getString(R.string.chess);
         }
         else
         {
-            result = "Computer turn " + Integer.toString(ComputerTurnChessCount) + " chess.";
+            result = getResources().getString(R.string.computer_turn) + Integer.toString(ComputerTurnChessCount) + getResources().getString(R.string.chess);
         }
         return result;
     }
     private String GetTimeDurationFormat(int sec,int min)
     {
-        String result = "none";
+        String result = "";
         if (min > 9)
         {
             result = Integer.toString(min);
@@ -453,7 +454,6 @@ public class GameView extends View {
     private int minute = 0;
     private final int FLASHNUM = 6;
     private final int BlockNum = 8;
-    private final int BlockCount = (BlockNum * BlockNum);
     private final int hx_grid = 20;
     private final int hy_grid = 140;
     private final int text_timer_x = 20;

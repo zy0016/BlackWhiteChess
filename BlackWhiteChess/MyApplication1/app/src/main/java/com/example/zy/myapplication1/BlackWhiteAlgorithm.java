@@ -25,7 +25,7 @@ public class BlackWhiteAlgorithm {
     private final int WEIGHT_LEVEL4 = 2;
     private final int WEIGHT_LEVEL5 = 1;
     private final int WEIGHT_LEVEL6 = -5;
-    private final int WEIGHT_LEVEL7 = -45;
+    //private final int WEIGHT_LEVEL7 = -45;
     public enum DIRECTION {ROW,COL};
     private final int[][] ChessPositionWeight =
             {
@@ -424,6 +424,86 @@ public class BlackWhiteAlgorithm {
         {
             System.exit(0);
         }
+        return result;
+    }
+    public PositionResult AnalyzeByTrueAlphaBeta(Chessman.ChessmanType blockstatus)
+    {
+        PositionResult result = new PositionResult();
+        PositionResult result_computer = new PositionResult();
+        PositionResult result_people = new PositionResult();
+        int computer_count = 0,people_count = 0,row,col,maxloop;
+        Chessman.ChessmanType current_player = Chessman.ChessmanType.NONE;
+        Chessman.ChessmanType computer_side = blockstatus;
+        Chessman.ChessmanType people_side = (blockstatus == Chessman.ChessmanType.WHITE ? Chessman.ChessmanType.BLACK:Chessman.ChessmanType.WHITE);
+        ArrayList<PositionResult> resultlist = new ArrayList<PositionResult>();
+
+        result.result = -1;
+        BackupChessman();
+        for (row = 0;row < BlockNum;row++)
+        {
+            for (col = 0;col < BlockNum;col++)
+            {
+                RestoreChessman();
+                if (sc[row][col].ct == Chessman.ChessmanType.NONE &&
+                        (computer_side == Chessman.ChessmanType.BLACK && sc[row][col].iWinChessNum_Black > 0) ||
+                        (computer_side == Chessman.ChessmanType.WHITE && sc[row][col].iWinChessNum_White > 0))
+                {
+                    computer_count = GetTurnChessResult(computer_side,col,row);
+                    if (computer_count <= 0)
+                        continue;
+
+                    maxloop = 1;
+                    current_player = people_side;
+                    while(maxloop < 60)//GetEmptyChessPosition() / 2
+                    {
+                        if (IfGameOver())
+                        {
+                            break;
+                        }
+                        if (current_player == people_side)
+                        {
+                            result_people = AnalyzeWeightBalance(current_player);
+                            if (result_people.result > 0)
+                            {
+                                if (GetTurnChessResult(current_player,result_people.col,result_people.row) <= 0)
+                                    break;
+                            }
+                            current_player = computer_side;
+                        }
+                        else
+                        {
+                            result_computer = AnalyzeWeightBalance(current_player);
+                            if (result_computer.result > 0)
+                            {
+                                if (GetTurnChessResult(current_player,result_computer.col,result_computer.row) <= 0)
+                                    break;
+                            }
+                            current_player = people_side;
+                        }
+                        maxloop++;
+                    }
+                    computer_count = CalculateChessCount(computer_side);
+                    people_count = CalculateChessCount(people_side);
+                    if (computer_count > people_count)
+                    {
+                        result_computer.row = row;
+                        result_computer.col = col;
+                        result_computer.result = computer_count - people_count;
+                        resultlist.add(result_computer);
+                    }
+                }
+            }
+        }
+        for (int i = 0;i < resultlist.size();i++)
+        {
+            if (resultlist.get(i).result > result.result)
+            {
+                result.result = resultlist.get(i).result;
+                result.row = resultlist.get(i).row;
+                result.col = resultlist.get(i).col;
+            }
+        }
+        RestoreChessman();
         return result;
     }
     public PositionResult AnalyzeAlphaBeta(Chessman.ChessmanType blockstatus)
