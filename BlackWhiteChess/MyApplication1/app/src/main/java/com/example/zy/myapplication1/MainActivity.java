@@ -78,14 +78,11 @@ public class MainActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //LinearLayout layout = (LinearLayout)findViewById(R.id.LinearLayout1);
-        //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(300,500);
-        //params.setMargins(5,5,5,5);
+        setContentView(R.layout.activity_chessview);
         /*if (gameView == null)
         {
             gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.COMPUTER);
         }*/
-        setContentView(R.layout.activity_chessview);
         /////////////button
         //button_computer_first = (Button)findViewById(R.id.button_computer);
         //button_people_first = (Button)findViewById(R.id.button_people);

@@ -345,6 +345,7 @@ public class GameView extends View {
     {
         Paint paint = new Paint();
         paint.setTextSize(20);
+
         for (int row = 0;row < BlockNum;row++)
         {
             for (int col = 0;col < BlockNum;col++)
