@@ -21,4 +21,10 @@ public class Chessman {
     int Weight;
     int iWinChessNum_Black;
     int iWinChessNum_White;
+
+    public Chessman()
+    {
+        ct = ChessmanType.NONE;
+        Orange = false;
+    }
 }

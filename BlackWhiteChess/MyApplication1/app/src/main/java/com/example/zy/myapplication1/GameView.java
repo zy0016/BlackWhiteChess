@@ -339,9 +339,14 @@ public class GameView extends View {
         }
         else
         {
-            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? getResources().getString(R.string.computer_run): getResources().getString(R.string.people_run);
+            txt = (Current_Player == CURRENT_PLAYER.COMPUTER) ? getResources().getString(R.string.computer_run) : getResources().getString(R.string.people_run);
         }
         canvas.drawText(txt,text_debug_data_x,text_debug_data_y,paint);
+        //////////////////
+        if (computerchess != null)
+        {
+            canvas.drawText(computerchess.Text,text_debug_data_x,text_debug_data_y2,paint);
+        }
     }
     private void DrawChessman(Canvas canvas)
     {
@@ -465,6 +470,7 @@ public class GameView extends View {
     private final int text_chess_data_y = 70;
     private final int text_debug_data_x = 20;
     private final int text_debug_data_y = 100;
+    private final int text_debug_data_y2 = 600;
     private int bh = 0;
     private int bw = bh;
     private int flashnum = 0;

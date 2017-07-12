@@ -10,4 +10,9 @@ public class PositionResult {
     public int result;
     public int weight;
     public String Text;
+
+    public PositionResult()
+    {
+        result = -1;
+    }
 }
