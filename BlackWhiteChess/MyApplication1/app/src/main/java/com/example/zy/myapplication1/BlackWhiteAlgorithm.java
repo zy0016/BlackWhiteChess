@@ -250,7 +250,7 @@ public class BlackWhiteAlgorithm {
         {
             if (sc[result_weight.row][result_weight.col].Weight == WEIGHT_LEVEL6)
             {
-                if (!IfCanPutChessPositionForWEIGHT_LEVEL6(blockstatus,result_weight.col,result_weight.row))
+                if (!IfCanPutChessPositionForWEIGHT_LEVEL67(blockstatus,result_weight.col,result_weight.row))
                 {
                     PositionResult result_weight_new = AnalyzeWeightBalance(blockstatus,result_weight.col,result_weight.row);
                     if (result_weight_new.result == -1)
@@ -270,12 +270,14 @@ public class BlackWhiteAlgorithm {
         }
     }
 
-    private boolean IfCanPutChessPositionForWEIGHT_LEVEL6(Chessman.ChessmanType blockstatus,int col,int row)
+    private boolean IfCanPutChessPositionForWEIGHT_LEVEL67(Chessman.ChessmanType blockstatus,int col,int row)
     {
         boolean canputchess = true;
         Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
         if (((row == 0 || row == BlockNum - 1) && (col == 1 || col == BlockNum - 2)) ||
-            ((col == 0 || col == BlockNum - 1) && (row == 1 || row == BlockNum - 2)))
+            ((col == 0 || col == BlockNum - 1) && (row == 1 || row == BlockNum - 2)) ||
+             (row == 1 && col == 1 || row == 1 && col == BlockNum - 2 || row == BlockNum - 2 && col == 1 || row == BlockNum - 2 && col == BlockNum - 2)
+                )
         {
             BackupChessman();
             if (GetTurnChessResult(blockstatus,col,row) > 0)
