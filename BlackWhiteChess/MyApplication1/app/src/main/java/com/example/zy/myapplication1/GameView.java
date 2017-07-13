@@ -312,7 +312,7 @@ public class GameView extends View {
         canvas.drawText(GetChessCountAll(),text_chess_data_x,text_chess_data_y,paint);
         ///debug
         String txt = "";
-        if (bwAlgorithm.IfGameOver())
+        if (bwAlgorithm != null && bwAlgorithm.IfGameOver())
         {
             StopGameTimer();
             txt = getResources().getString(R.string.game_over);//"Game over,";
@@ -343,7 +343,7 @@ public class GameView extends View {
         }
         canvas.drawText(txt,text_debug_data_x,text_debug_data_y,paint);
         //////////////////
-        if (computerchess != null)
+        if (computerchess != null && computerchess.Text != null && computerchess.Text.length() > 0)
         {
             canvas.drawText(computerchess.Text,text_debug_data_x,text_debug_data_y2,paint);
         }
