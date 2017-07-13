@@ -13,6 +13,6 @@ public class PositionResult {
 
     public PositionResult()
     {
-        result = -1;
+        result = 0;
     }
 }
