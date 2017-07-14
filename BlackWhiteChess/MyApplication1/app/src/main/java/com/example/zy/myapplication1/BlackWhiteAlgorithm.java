@@ -181,6 +181,8 @@ public class BlackWhiteAlgorithm {
         PositionResult result_weight = AnalyzeWeightBalance(blockstatus);
         int row = result_weight.row;
         int col = result_weight.col;
+
+        UpdateCWPWeightStatusForLevel6(blockstatus);
         if (sc[row][col].Weight == WEIGHT_MAX)
         {
             result_weight.Text = "Find WEIGHT_MAX";
@@ -1006,6 +1008,59 @@ public class BlackWhiteAlgorithm {
             WeightPositionSort(CWP,BlockCount);
         }
         return UpdateWeight;
+    }
+
+    private void UpdatePositionWeight(int col1,int row1,int col2,int row2)
+    {
+        CWP[row1 * BlockNum + col1].BlockWeight = WEIGHT_LEVEL8;
+        CWP[row2 * BlockNum + col2].BlockWeight = WEIGHT_LEVEL8;
+        sc[row1][col1].Weight = WEIGHT_LEVEL8;
+        sc[row2][col2].Weight = WEIGHT_LEVEL8;
+    }
+    private void UpdateCWPWeightStatusForLevel6(Chessman.ChessmanType blockstatus)
+    {
+        boolean UpdateWeight = false;
+        int row1,row2,col1,col2;
+        if (sc[0][0].ct == blockstatus)
+        {
+            row1 = 0;
+            col1 = 1;
+            row2 = 1;
+            col2 = 0;
+            UpdatePositionWeight(col1,row1,col2,row2);
+            UpdateWeight = true;
+        }
+        if (sc[0][BlockNum - 1].ct == blockstatus)
+        {
+            row1 = 0;
+            col1 = BlockNum - 2;
+            row2 = 1;
+            col2 = BlockNum - 1;
+            UpdatePositionWeight(col1,row1,col2,row2);
+            UpdateWeight = true;
+        }
+        if (sc[BlockNum - 1][0].ct == blockstatus)
+        {
+            row1 = BlockNum - 2;
+            col1 = 0;
+            row2 = BlockNum - 1;
+            col2 = 1;
+            UpdatePositionWeight(col1,row1,col2,row2);
+            UpdateWeight = true;
+        }
+        if (sc[BlockNum - 1][BlockNum - 1].ct == blockstatus)
+        {
+            row1 = BlockNum - 2;
+            col1 = BlockNum - 1;
+            row2 = BlockNum - 1;
+            col2 = BlockNum - 2;
+            UpdatePositionWeight(col1,row1,col2,row2);
+            UpdateWeight = true;
+        }
+        if (UpdateWeight)
+        {
+            WeightPositionSort(CWP,BlockCount);
+        }
     }
     private boolean FindInvalidValue(int value[])
     {
