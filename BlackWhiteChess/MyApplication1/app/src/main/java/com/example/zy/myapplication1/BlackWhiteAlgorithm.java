@@ -182,6 +182,7 @@ public class BlackWhiteAlgorithm {
         int row = result_weight.row;
         int col = result_weight.col;
 
+        UpdateCWPWeightStatusForLevel1(blockstatus);
         UpdateCWPWeightStatusForLevel6(blockstatus);
         if (sc[row][col].Weight == WEIGHT_MAX)
         {
@@ -287,6 +288,7 @@ public class BlackWhiteAlgorithm {
         {
             for (int col = 0;col < BlockNum;col++)
             {
+                RestoreChessman();
                 if (((row == 0 || row == BlockNum - 1) && (col == 1 || col == BlockNum - 2)) ||
                      ((col == 0 || col == BlockNum - 1) && (row == 1 || row == BlockNum - 2)) ||
                         ((row == 1 && col == 1) ||
@@ -298,7 +300,6 @@ public class BlackWhiteAlgorithm {
                     iWinChessNum = GetWinChessNum(blockstatus,col,row);
                     if (sc[row][col].ct == Chessman.ChessmanType.NONE && iWinChessNum > 0)
                     {
-                        RestoreChessman();
                         if (GetTurnChessResult(blockstatus,col,row) > 0)
                         {
                             PositionResult result_people = AnalyzeWeightBalance(enemychess);
@@ -1010,24 +1011,28 @@ public class BlackWhiteAlgorithm {
         return UpdateWeight;
     }
 
-    private void UpdatePositionWeight(int col1,int row1,int col2,int row2)
+    private void UpdatePositionWeight(int col1,int row1,int col2,int row2,int col3,int row3)
     {
         CWP[row1 * BlockNum + col1].BlockWeight = WEIGHT_LEVEL8;
         CWP[row2 * BlockNum + col2].BlockWeight = WEIGHT_LEVEL8;
+        CWP[row3 * BlockNum + col3].BlockWeight = WEIGHT_LEVEL8;
         sc[row1][col1].Weight = WEIGHT_LEVEL8;
         sc[row2][col2].Weight = WEIGHT_LEVEL8;
+        sc[row3][col3].Weight = WEIGHT_LEVEL8;
     }
     private void UpdateCWPWeightStatusForLevel6(Chessman.ChessmanType blockstatus)
     {
         boolean UpdateWeight = false;
-        int row1,row2,col1,col2;
+        int row1,row2,col1,col2,row3,col3;
         if (sc[0][0].ct == blockstatus)
         {
             row1 = 0;
             col1 = 1;
             row2 = 1;
             col2 = 0;
-            UpdatePositionWeight(col1,row1,col2,row2);
+            row3 = 1;
+            col3 = 1;
+            UpdatePositionWeight(col1,row1,col2,row2,col3,row3);
             UpdateWeight = true;
         }
         if (sc[0][BlockNum - 1].ct == blockstatus)
@@ -1036,7 +1041,9 @@ public class BlackWhiteAlgorithm {
             col1 = BlockNum - 2;
             row2 = 1;
             col2 = BlockNum - 1;
-            UpdatePositionWeight(col1,row1,col2,row2);
+            row3 = 1;
+            col3 = BlockNum - 2;
+            UpdatePositionWeight(col1,row1,col2,row2,col3,row3);
             UpdateWeight = true;
         }
         if (sc[BlockNum - 1][0].ct == blockstatus)
@@ -1045,7 +1052,9 @@ public class BlackWhiteAlgorithm {
             col1 = 0;
             row2 = BlockNum - 1;
             col2 = 1;
-            UpdatePositionWeight(col1,row1,col2,row2);
+            row3 = BlockNum - 2;
+            col3 = 1;
+            UpdatePositionWeight(col1,row1,col2,row2,col3,row3);
             UpdateWeight = true;
         }
         if (sc[BlockNum - 1][BlockNum - 1].ct == blockstatus)
@@ -1054,8 +1063,38 @@ public class BlackWhiteAlgorithm {
             col1 = BlockNum - 1;
             row2 = BlockNum - 1;
             col2 = BlockNum - 2;
-            UpdatePositionWeight(col1,row1,col2,row2);
+            row3 = BlockNum - 2;
+            col3 = BlockNum - 2;
+            UpdatePositionWeight(col1,row1,col2,row2,col3,row3);
             UpdateWeight = true;
+        }
+        if (UpdateWeight)
+        {
+            WeightPositionSort(CWP,BlockCount);
+        }
+    }
+    private void UpdateCWPWeightStatusForLevel1(Chessman.ChessmanType blockstatus)
+    {
+        boolean UpdateWeight = false;
+        Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        for (int row = 0;row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                if (sc[row][col].ct == Chessman.ChessmanType.NONE && sc[row][col].Weight == WEIGHT_LEVEL1)
+                {
+                    if ((row == 0 || row == BlockNum - 1) && (sc[row][col - 1].ct == enemychess && sc[row][col + 1].ct == enemychess))
+                    {
+                        CWP[row * BlockNum + col].BlockWeight = WEIGHT_LEVEL8;
+                        sc[row][col].Weight = WEIGHT_LEVEL8;
+                    }
+                    if ((col == 0 || col == BlockNum - 1) && (sc[row - 1][col].ct == enemychess && sc[row + 1][col].ct == enemychess))
+                    {
+                        CWP[row * BlockNum + col].BlockWeight = WEIGHT_LEVEL8;
+                        sc[row][col].Weight = WEIGHT_LEVEL8;
+                    }
+                }
+            }
         }
         if (UpdateWeight)
         {
