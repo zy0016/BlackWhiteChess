@@ -198,7 +198,19 @@ public class BlackWhiteAlgorithm {
         if (sc[row][col].Weight == WEIGHT_LEVEL1 || sc[row][col].Weight == WEIGHT_LEVEL2)
         {
             result_weight = GetBetterPositionForWeight_Level12(blockstatus,col,row);
-            return result_weight;
+            if (IfGetMaxWeightForEnemy(blockstatus,result_weight.col,result_weight.row))
+            {
+                PositionResult result_alphabeta_improve = GetBetterPositionWithoutMaxWeightForEnemy(blockstatus,result_weight.col,result_weight.row);
+                result_alphabeta_improve.Text = "S1 Old Row:" + Integer.toString(result_weight.row) + ",Col:" + Integer.toString(result_weight.col) +
+                        " R:" + Integer.toString(result_weight.result) + " W:" + Integer.toString(sc[result_weight.row][result_weight.row].Weight) +
+                        " New Row:" + Integer.toString(result_alphabeta_improve.row) + ",Col:" + Integer.toString(result_alphabeta_improve.col) +
+                        " R:" + Integer.toString(result_alphabeta_improve.result) + " W:" + Integer.toString(sc[result_alphabeta_improve.row][result_alphabeta_improve.col].Weight);
+                return result_alphabeta_improve;
+            }
+            else
+            {
+                return result_weight;
+            }
         }
         PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
         if (result_alphabeta.result > 0 &&
@@ -206,15 +218,28 @@ public class BlackWhiteAlgorithm {
                 sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL4 ||
                 sc[result_alphabeta.row][result_alphabeta.col].Weight == WEIGHT_LEVEL5)
         {
-            result_alphabeta.Text = "Use AnalyzeAlphaBeta";
-            return result_alphabeta;
+            if (IfGetMaxWeightForEnemy(blockstatus,result_alphabeta.col,result_alphabeta.row))
+            {
+                PositionResult result_alphabeta_improve = GetBetterPositionWithoutMaxWeightForEnemy(blockstatus,result_alphabeta.col,result_alphabeta.row);
+                result_alphabeta_improve.Text = "S2 Old Row:" + Integer.toString(result_alphabeta.row) + ",Col:" + Integer.toString(result_alphabeta.col) +
+                        " R:" + Integer.toString(result_alphabeta.result) + " W:" + Integer.toString(sc[result_alphabeta.row][result_alphabeta.row].Weight) +
+                        " New Row:" + Integer.toString(result_alphabeta_improve.row) + ",Col:" + Integer.toString(result_alphabeta_improve.col) +
+                        " R:" + Integer.toString(result_alphabeta_improve.result) + " W:" + Integer.toString(sc[result_alphabeta_improve.row][result_alphabeta_improve.col].Weight);
+                return result_alphabeta_improve;
+            }
+            else
+            {
+                result_alphabeta.Text = "Use AnalyzeAlphaBeta";
+                return result_alphabeta;
+            }
         }
         if (sc[result_weight.row][result_weight.col].Weight == WEIGHT_LEVEL6||sc[result_weight.row][result_weight.col].Weight == WEIGHT_LEVEL7)
         {
             PositionResult result_weight67 = GetBetterPositionForWeight_Level67(blockstatus);
             if (result_weight67.result > 0)
             {
-                result_weight67.Text = "old row:" + Integer.toString(result_weight.row) + ",col:" + Integer.toString(result_weight.col) +
+                result_weight67.Text = "S3 old row:" + Integer.toString(result_weight.row) + ",col:" + Integer.toString(result_weight.col) +
+                        " r:" + Integer.toString(result_weight.result) + " w:" + Integer.toString(sc[result_weight.row][result_weight.row].Weight) +
                         " new row:" + Integer.toString(result_weight67.row) + ",col:" + Integer.toString(result_weight67.col) +
                         " r:" + Integer.toString(result_weight67.result) + " w:" + Integer.toString(sc[result_weight67.row][result_weight67.col].Weight);
                 return result_weight67;
@@ -224,6 +249,77 @@ public class BlackWhiteAlgorithm {
         return result_weight;
     }
 
+    private PositionResult GetBetterPositionWithoutMaxWeightForEnemy(Chessman.ChessmanType blockstatus,int col_ori,int row_ori)
+    {
+        ArrayList<PositionResult> resultlist = new ArrayList<PositionResult>();
+        boolean bfindposition = false;
+        PositionResult result = new PositionResult();
+        result.row = row_ori;
+        result.col = col_ori;
+        result.result = GetWinChessNum(blockstatus,col_ori,row_ori);
+        int iWinChessNum = 0;
+        Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+
+        BackupChessman();
+        for (int row = 0;row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                RestoreChessman();
+                iWinChessNum = GetWinChessNum(blockstatus,col,row);
+                if (sc[row][col].ct == Chessman.ChessmanType.NONE && iWinChessNum > 0)
+                {
+                    if (GetTurnChessResult(blockstatus,col,row) > 0)
+                    {
+                        PositionResult result_people = AnalyzeWeightBalance(enemychess);
+                        if (result_people.result > 0 && sc[result_people.row][result_people.col].Weight != WEIGHT_MAX)
+                        {
+                            result.result = iWinChessNum;
+                            result.row = row;
+                            result.col = col;
+                            bfindposition = true;
+                            resultlist.add(result);
+                        }
+                    }
+                }
+            }
+        }
+        RestoreChessman();
+        if (bfindposition)
+        {
+            for (int i = 0;i < resultlist.size();i++)
+            {
+                if (resultlist.get(i).result > result.result)
+                {
+                    result.result = resultlist.get(i).result;
+                    result.row = resultlist.get(i).row;
+                    result.col = resultlist.get(i).col;
+                }
+            }
+        }
+        return result;
+    }
+    private boolean IfGetMaxWeightForEnemy(Chessman.ChessmanType blockstatus,int col,int row)
+    {
+        boolean bEnemyGetMaxWeitht = false;
+        Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        int iWinChessNum = 0;
+        BackupChessman();
+        iWinChessNum = GetWinChessNum(blockstatus,col,row);
+        if (sc[row][col].ct == Chessman.ChessmanType.NONE && iWinChessNum > 0)
+        {
+            if (GetTurnChessResult(blockstatus, col, row) > 0)
+            {
+                PositionResult result_people = AnalyzeWeightBalance(enemychess);
+                if (result_people.result > 0 && sc[result_people.row][result_people.col].Weight == WEIGHT_MAX)
+                {
+                    bEnemyGetMaxWeitht = true;
+                }
+            }
+        }
+        RestoreChessman();
+        return bEnemyGetMaxWeitht;
+    }
     private PositionResult GetBetterPositionForWeight_Level12(Chessman.ChessmanType blockstatus,int col,int row)
     {
         PositionResult result_weight = new PositionResult();
