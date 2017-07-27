@@ -20,7 +20,7 @@ import java.util.TimerTask;
  */
 
 public class GameView extends View {
-    public GameView(Context context,Chessman.ChessmanType people_role,Chessman.ChessmanType program_role,CURRENT_PLAYER current_player)
+    public GameView(Context context,Chessman.ChessmanType people_role,Chessman.ChessmanType program_role,CURRENT_PLAYER current_player,int gridtype)
     {
         super(context,null);
 
@@ -32,7 +32,7 @@ public class GameView extends View {
         ComputerTurnChessCount = 0;
         PeopleTurnChessCount = 0;
 
-        initGameView(context);
+        initGameView(context,gridtype);
 
         bwAlgorithm = new BlackWhiteAlgorithm(chessman,BlockNum);
         if (Current_Player == CURRENT_PLAYER.COMPUTER)
@@ -51,11 +51,11 @@ public class GameView extends View {
         this.postInvalidate();
     }
 
-    private void initGameView(Context context)
+    private void initGameView(Context context,int gridtype)
     {
         InitHandler();
         InitPicture();
-        InitChessGrid();
+        InitChessGrid(gridtype);
         soundPool = new SoundPool(10,AudioManager.STREAM_SYSTEM,5);
         soundPool.load(context,R.raw.notify,1);
     }
@@ -67,7 +67,7 @@ public class GameView extends View {
         bh = bitmap_black.getHeight();
         bw = bitmap_black.getWidth();
     }
-    private void InitChessGrid()
+    private void InitChessGrid(int gridtype)
     {
         chessman = new Chessman[BlockNum][BlockNum];
         for (int row = 0;row < BlockNum;row++)
@@ -83,10 +83,20 @@ public class GameView extends View {
                 chessman[row][col].Orange = false;
             }
         }
-        chessman[BlockNum / 2 - 1][BlockNum / 2 - 1].ct = Chessman.ChessmanType.BLACK;
-        chessman[BlockNum / 2 - 1][BlockNum / 2].ct = Chessman.ChessmanType.WHITE;
-        chessman[BlockNum / 2][BlockNum / 2 - 1].ct = Chessman.ChessmanType.WHITE;
-        chessman[BlockNum / 2][BlockNum  /2].ct = Chessman.ChessmanType.BLACK;
+        if (gridtype == 0)
+        {
+            chessman[BlockNum / 2 - 1][BlockNum / 2 - 1].ct = Chessman.ChessmanType.WHITE;
+            chessman[BlockNum / 2 - 1][BlockNum / 2].ct = Chessman.ChessmanType.BLACK;
+            chessman[BlockNum / 2][BlockNum / 2 - 1].ct = Chessman.ChessmanType.BLACK;
+            chessman[BlockNum / 2][BlockNum  /2].ct = Chessman.ChessmanType.WHITE;
+        }
+        else
+        {
+            chessman[BlockNum / 2 - 1][BlockNum / 2 - 1].ct = Chessman.ChessmanType.BLACK;
+            chessman[BlockNum / 2 - 1][BlockNum / 2].ct = Chessman.ChessmanType.WHITE;
+            chessman[BlockNum / 2][BlockNum / 2 - 1].ct = Chessman.ChessmanType.WHITE;
+            chessman[BlockNum / 2][BlockNum  /2].ct = Chessman.ChessmanType.BLACK;
+        }
     }
 
     @Override

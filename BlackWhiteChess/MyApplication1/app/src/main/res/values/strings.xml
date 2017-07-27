@@ -21,4 +21,5 @@
     <string name="people_turn">你翻了</string>
     <string name="computer_turn">计算机翻了</string>
     <string name="chess">子</string>
+    <string name="computer_first_run_2">计算机先走(风格2)</string>
 </resources>

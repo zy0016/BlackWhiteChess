@@ -64,13 +64,19 @@ public class MainActivity extends AppCompatActivity  {
 
     public void computer_first_run(View view)
     {
-        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.COMPUTER);
+        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.COMPUTER,0);
+        setContentView(gameView);
+    }
+
+    public void computer_first_run_2(View view)
+    {
+        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.COMPUTER,1);
         setContentView(gameView);
     }
 
     public void people_first_run(View view)
     {
-        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.PEOPLE);
+        gameView = new GameView(this,Chessman.ChessmanType.WHITE,Chessman.ChessmanType.BLACK,GameView.CURRENT_PLAYER.PEOPLE,0);
         setContentView(gameView);
     }
 
