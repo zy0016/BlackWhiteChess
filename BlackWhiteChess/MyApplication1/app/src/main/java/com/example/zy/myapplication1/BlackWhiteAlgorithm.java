@@ -11,8 +11,10 @@ public class BlackWhiteAlgorithm {
     private int BlockCount = 0;
     private Chessman[][] sc = null;
     private Chessman[][] sc_backup = null;
+    private Chessman[][] sc_backup2 = null;
     private CheckWeightPosition[] CWP = null;
     private CheckWeightPosition[] CWP_backup = null;
+    private CheckWeightPosition[] CWP_backup2 = null;
     private final int DIRECTION_UP = 0x01;
     private final int DIRECTION_DOWN = 0x02;
     private final int DIRECTION_LEFT = 0x04;
@@ -46,7 +48,9 @@ public class BlackWhiteAlgorithm {
         BlockCount = BlockNum * BlockNum;
         CWP = new CheckWeightPosition[BlockCount];
         CWP_backup = new CheckWeightPosition[BlockCount];
+        CWP_backup2 = new CheckWeightPosition[BlockCount];
         sc_backup = new Chessman[BlockNum][BlockNum];
+        sc_backup2 = new Chessman[BlockNum][BlockNum];
         for (int row = 0; row < BlockNum;row++)
         {
             for (int col = 0;col < BlockNum;col++)
@@ -60,11 +64,18 @@ public class BlackWhiteAlgorithm {
                 sc_backup[row][col] = new Chessman();
                 sc_backup[row][col].Weight = sc[row][col].Weight;
                 sc_backup[row][col].ct = sc[row][col].ct;
+                sc_backup2[row][col] = new Chessman();
+                sc_backup2[row][col].Weight = sc[row][col].Weight;
+                sc_backup2[row][col].ct = sc[row][col].ct;
                 ///////////////////////////
                 CWP_backup[row * BlockNum + col] = new CheckWeightPosition();
                 CWP_backup[row * BlockNum + col].row = row;
                 CWP_backup[row * BlockNum + col].col = col;
                 CWP_backup[row * BlockNum + col].BlockWeight = ChessPositionWeight[row][col];
+                CWP_backup2[row * BlockNum + col] = new CheckWeightPosition();
+                CWP_backup2[row * BlockNum + col].row = row;
+                CWP_backup2[row * BlockNum + col].col = col;
+                CWP_backup2[row * BlockNum + col].BlockWeight = ChessPositionWeight[row][col];
             }
         }
         WeightPositionSort(CWP,BlockCount);
@@ -177,12 +188,11 @@ public class BlackWhiteAlgorithm {
                 return result_weight67;
             }
         }*/
-        /*PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
+        PositionResult result_alphabeta = AnalyzeAlphaBeta(blockstatus);
         if (result_alphabeta.result > 0)
         {
-            result_alphabeta.Text = "Use AnalyzeAlphaBeta";
             return result_alphabeta;
-        }*/
+        }
         return result_weight;
     }
 
@@ -238,20 +248,6 @@ public class BlackWhiteAlgorithm {
                 bputchess = false;
             }
         }
-        /*PositionResult result_weight = new PositionResult();
-        if (bputchess)
-        {
-            result_weight.col = col;
-            result_weight.row = row;
-            result_weight.result = sc[row][col].Weight;
-            result_weight.Text = "Find WEIGHT_LEVEL1";
-        }
-        else
-        {
-            //result_weight = AnalyzeWeightBalance(blockstatus,col,row);
-            //result_weight.Text = "Except row:" + Integer.toString(row) + " col:" + Integer.toString(col);
-            result_weight.result = -1;
-        }*/
         return bputchess;
     }
     private boolean HaveEnemyChessInDirect(Chessman.ChessmanType mychess,int col,int row,int direct)
@@ -601,6 +597,66 @@ public class BlackWhiteAlgorithm {
         return p;
     }*/
 
+    public PositionResult AnalyzeMaxMin(Chessman.ChessmanType blockstatus)
+    {
+        PositionResult result = new PositionResult();
+        PositionResult result_computer;
+        PositionResult result_people;
+        int computer_count,people_count,row,col,iwin;
+        Chessman.ChessmanType current_player ;
+        Chessman.ChessmanType computer_side = blockstatus;
+        Chessman.ChessmanType people_side = (blockstatus == Chessman.ChessmanType.WHITE ? Chessman.ChessmanType.BLACK:Chessman.ChessmanType.WHITE);
+        result.result = -1;
+        BackupChessman2();
+
+        current_player = blockstatus;
+        result_computer = AnalyzeWeightBalance(current_player);
+        row = result_computer.row;
+        col = result_computer.col;
+        iwin = result_computer.result;
+        if (result_computer.result > 0)
+        {
+            while (IfCanPutChessForPlayer(computer_side) || IfCanPutChessForPlayer(people_side))
+            {
+                if (IfGameOver())
+                {
+                    break;
+                }
+                if (current_player == people_side)
+                {
+                    result_people = AnalyzeWeightBalance(current_player);
+                    if (result_people.result > 0)
+                    {
+                        if (GetTurnChessResult(current_player,result_people.col,result_people.row) <= 0)
+                            break;
+                    }
+                    current_player = computer_side;
+                }
+                else
+                {
+                    result_computer = AnalyzeWeightBalance(current_player);
+                    if (result_computer.result > 0)
+                    {
+                        if (GetTurnChessResult(current_player,result_computer.col,result_computer.row) <= 0)
+                            break;
+                    }
+                    current_player = people_side;
+                }
+            }
+        }
+        computer_count = CalculateChessCount(computer_side);
+        people_count = CalculateChessCount(people_side);
+        if (computer_count > people_count)
+        {
+            result.row = row;
+            result.col = col;
+            result.result = iwin;
+            result.Text = "AnalyzeMaxMin:" + Integer.toString(computer_count - people_count);
+        }
+        RestoreChessman2();
+        return result;
+    }
+
     public PositionResult AnalyzeAlphaBeta(Chessman.ChessmanType blockstatus)
     {
         PositionResult result = new PositionResult();
@@ -613,12 +669,12 @@ public class BlackWhiteAlgorithm {
         ArrayList<PositionResult> resultlist = new ArrayList<PositionResult>();
 
         result.result = -1;
-        BackupChessman();
+        BackupChessman2();
         for (row = 0;row < BlockNum;row++)
         {
             for (col = 0;col < BlockNum;col++)
             {
-                RestoreChessman();
+                RestoreChessman2();
                 if (sc[row][col].ct == Chessman.ChessmanType.NONE &&
                         (computer_side == Chessman.ChessmanType.BLACK && sc[row][col].iWinChessNum_Black > 0) ||
                         (computer_side == Chessman.ChessmanType.WHITE && sc[row][col].iWinChessNum_White > 0))
@@ -676,9 +732,10 @@ public class BlackWhiteAlgorithm {
                 result.result = resultlist.get(i).result;
                 result.row = resultlist.get(i).row;
                 result.col = resultlist.get(i).col;
+                result.Text = "AnalyzeAlphaBeta:" + Integer.toString(result.result);
             }
         }
-        RestoreChessman();
+        RestoreChessman2();
         return result;
     }
 
@@ -1266,6 +1323,30 @@ public class BlackWhiteAlgorithm {
         //WeightPositionSort(CWP,BlockCount);
         //UpdateCanTurnChessCountStatus();
     }
+    private void BackupChessman2()
+    {
+        for (int row = 0; row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                sc_backup2[row][col].x = sc[row][col].x;
+                sc_backup2[row][col].y = sc[row][col].y;
+                sc_backup2[row][col].w = sc[row][col].w;
+                sc_backup2[row][col].h = sc[row][col].h;
+                sc_backup2[row][col].ct = sc[row][col].ct;
+                sc_backup2[row][col].Orange = sc[row][col].Orange;
+                sc_backup2[row][col].Weight = sc[row][col].Weight;
+                sc_backup2[row][col].iWinChessNum_Black = sc[row][col].iWinChessNum_Black;
+                sc_backup2[row][col].iWinChessNum_White = sc[row][col].iWinChessNum_White;
+            }
+        }
+        for (int i = 0;i < BlockCount;i++)
+        {
+            CWP_backup2[i].BlockWeight = CWP[i].BlockWeight;
+            CWP_backup2[i].col = CWP[i].col;
+            CWP_backup2[i].row = CWP[i].row;
+        }
+    }
     private void RestoreChessman()
     {
         for (int row = 0; row < BlockNum;row++)
@@ -1288,6 +1369,32 @@ public class BlackWhiteAlgorithm {
             CWP[i].BlockWeight = CWP_backup[i].BlockWeight;
             CWP[i].col = CWP_backup[i].col;
             CWP[i].row = CWP_backup[i].row;
+        }
+        WeightPositionSort(CWP,BlockCount);
+        UpdateCanTurnChessCountStatus();
+    }
+    private void RestoreChessman2()
+    {
+        for (int row = 0; row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                sc[row][col].x = sc_backup2[row][col].x;
+                sc[row][col].y = sc_backup2[row][col].y;
+                sc[row][col].w = sc_backup2[row][col].w;
+                sc[row][col].h = sc_backup2[row][col].h;
+                sc[row][col].ct = sc_backup2[row][col].ct;
+                sc[row][col].Orange = sc_backup2[row][col].Orange;
+                sc[row][col].Weight = sc_backup2[row][col].Weight;
+                sc[row][col].iWinChessNum_Black = sc_backup2[row][col].iWinChessNum_Black;
+                sc[row][col].iWinChessNum_White = sc_backup2[row][col].iWinChessNum_White;
+            }
+        }
+        for (int i = 0;i < BlockCount;i++)
+        {
+            CWP[i].BlockWeight = CWP_backup2[i].BlockWeight;
+            CWP[i].col = CWP_backup2[i].col;
+            CWP[i].row = CWP_backup2[i].row;
         }
         WeightPositionSort(CWP,BlockCount);
         UpdateCanTurnChessCountStatus();
