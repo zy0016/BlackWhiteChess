@@ -428,56 +428,6 @@ public class BlackWhiteAlgorithm {
     }
 
     /*
-    private PositionResult GetBetterPositionWithoutMaxWeightForEnemy(Chessman.ChessmanType blockstatus,int col_ori,int row_ori)
-    {
-        ArrayList<PositionResult> resultlist = new ArrayList<PositionResult>();
-        boolean bfindposition = false;
-        PositionResult result = new PositionResult();
-        result.row = row_ori;
-        result.col = col_ori;
-        result.result = GetWinChessNum(blockstatus,col_ori,row_ori);
-        int iWinChessNum = 0;
-        Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
-
-        BackupChessman();
-        for (int row = 0;row < BlockNum;row++)
-        {
-            for (int col = 0;col < BlockNum;col++)
-            {
-                RestoreChessman();
-                iWinChessNum = GetWinChessNum(blockstatus,col,row);
-                if (sc[row][col].ct == Chessman.ChessmanType.NONE && iWinChessNum > 0)
-                {
-                    if (GetTurnChessResult(blockstatus,col,row) > 0)
-                    {
-                        PositionResult result_people = AnalyzeWeightBalance(enemychess);
-                        if (result_people.result > 0 && sc[result_people.row][result_people.col].Weight != WEIGHT_MAX)
-                        {
-                            result.result = iWinChessNum;
-                            result.row = row;
-                            result.col = col;
-                            bfindposition = true;
-                            resultlist.add(result);
-                        }
-                    }
-                }
-            }
-        }
-        RestoreChessman();
-        if (bfindposition)
-        {
-            for (int i = 0;i < resultlist.size();i++)
-            {
-                if (resultlist.get(i).result > result.result)
-                {
-                    result.result = resultlist.get(i).result;
-                    result.row = resultlist.get(i).row;
-                    result.col = resultlist.get(i).col;
-                }
-            }
-        }
-        return result;
-    }
     private PositionResult GetBetterPositionForWeight_Level67(Chessman.ChessmanType blockstatus)
     {
         ArrayList<PositionResult> resultlist = new ArrayList<PositionResult>();
@@ -534,68 +484,6 @@ public class BlackWhiteAlgorithm {
         }
         return result;
     }
-    public PositionResult AnalyzeWeightBalance(Chessman.ChessmanType blockstatus,int colexcept,int rowexcept)
-    {
-        PositionResult result = new PositionResult();
-        result.result = -1;
-        UpdateCanTurnChessCountStatus();
-        for (int i = 0;i < BlockCount;i++)
-        {
-            //get coordinate of chess block
-            int row = CWP[i].row;
-            int col = CWP[i].col;
-            if (row == rowexcept && col == colexcept)
-                continue;
-            if ((blockstatus == Chessman.ChessmanType.BLACK && sc[row][col].iWinChessNum_Black != 0) ||
-                (blockstatus == Chessman.ChessmanType.WHITE && sc[row][col].iWinChessNum_White != 0))
-            {
-                result = GetPositionFromSameWeight(blockstatus,sc[row][col].Weight,col,row);
-                if (result.row == rowexcept && result.col == colexcept)
-                    continue;
-                if (result.result > 0)
-                {
-                    return result;
-                }
-            }
-        }
-        result = AnalyzeWeightBalance(blockstatus);
-        return result;
-    }public PositionResult GetPositionFromSameWeight(Chessman.ChessmanType blockstatus,int weightvalue,int exceptcol,int exceptrow)
-    {
-        PositionResult p = new PositionResult();
-        int count = 0,MaxWinChessNum = 0;
-        for (int row = 0;row < BlockNum;row++)
-        {
-            for (int col = 0;col < BlockNum;col++)
-            {
-                if (row == exceptrow && col == exceptcol)
-                    continue;
-                switch (blockstatus)
-                {
-                    case BLACK:
-                        if (sc[row][col].ct == Chessman.ChessmanType.NONE && sc[row][col].Weight == weightvalue && sc[row][col].iWinChessNum_Black > MaxWinChessNum)
-                        {
-                            count++;
-                            MaxWinChessNum = sc[row][col].iWinChessNum_Black;
-                            p.col = col;
-                            p.row = row;
-                        }
-                        break;
-                    case WHITE:
-                        if (sc[row][col].ct == Chessman.ChessmanType.NONE && sc[row][col].Weight == weightvalue && sc[row][col].iWinChessNum_White > MaxWinChessNum)
-                        {
-                            count++;
-                            MaxWinChessNum = sc[row][col].iWinChessNum_White;
-                            p.col = col;
-                            p.row = row;
-                        }
-                        break;
-                }
-            }
-        }
-        p.result = count;
-        return p;
-    }*/
 
     public PositionResult AnalyzeMaxMin(Chessman.ChessmanType blockstatus)
     {
@@ -655,14 +543,14 @@ public class BlackWhiteAlgorithm {
         }
         RestoreChessman2();
         return result;
-    }
+    }*/
 
     public PositionResult AnalyzeAlphaBeta(Chessman.ChessmanType blockstatus)
     {
         PositionResult result = new PositionResult();
         PositionResult result_computer = new PositionResult();
         PositionResult result_people = new PositionResult();
-        int computer_count,people_count,row,col,maxloop;
+        int computer_count,people_count,row,col/*,maxloop*/;
         Chessman.ChessmanType current_player ;
         Chessman.ChessmanType computer_side = blockstatus;
         Chessman.ChessmanType people_side = (blockstatus == Chessman.ChessmanType.WHITE ? Chessman.ChessmanType.BLACK:Chessman.ChessmanType.WHITE);
@@ -683,9 +571,9 @@ public class BlackWhiteAlgorithm {
                     if (computer_count <= 0)
                         continue;
 
-                    maxloop = 1;
+                    //maxloop = 1;
                     current_player = people_side;
-                    while(maxloop < 60)//GetEmptyChessPosition() / 2
+                    while (IfCanPutChessForPlayer(computer_side) || IfCanPutChessForPlayer(people_side))//(maxloop++ < 60)
                     {
                         if (IfGameOver())
                         {
@@ -711,7 +599,6 @@ public class BlackWhiteAlgorithm {
                             }
                             current_player = people_side;
                         }
-                        maxloop++;
                     }
                     computer_count = CalculateChessCount(computer_side);
                     people_count = CalculateChessCount(people_side);
@@ -1069,19 +956,6 @@ public class BlackWhiteAlgorithm {
             }
         }
         return result;
-    }
-    private int GetEmptyChessPosition()
-    {
-        int iRemainChess = 0;
-        for (int row = 0;row < BlockNum;row++)
-        {
-            for (int col = 0;col < BlockNum;col++)
-            {
-                if (sc[row][col].ct == Chessman.ChessmanType.NONE)
-                    iRemainChess++;
-            }
-        }
-        return iRemainChess;
     }
     private int GetWinChessNum(Chessman.ChessmanType blockstatus,int col,int row)
     {

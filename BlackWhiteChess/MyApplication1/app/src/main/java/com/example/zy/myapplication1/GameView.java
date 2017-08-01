@@ -155,7 +155,8 @@ public class GameView extends View {
                             DrawChessAgain();
                             return true;
                         }
-                        ComputerRun();
+                        //ComputerRun();
+                        InitComputerRun();
                         soundPool.play(1,3, 3, 0, 0, 1);
                     }
                 }
@@ -173,14 +174,24 @@ public class GameView extends View {
 
     private void InitHandler()
     {
-        handler_computer = new Handler(){
+        handler_analyze = new Handler(){
+            @Override
+            public void handleMessage(Message msg)
+            {
+                super.handleMessage(msg);
+                timer_analyze.cancel();
+                ComputerRun();
+            }
+        };
+        ///////////////////
+        handler_flashchess = new Handler(){
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == FLASHNUM)
                 {
                     flashnum = 0;
-                    timer_computer.cancel();
+                    timer_flashchess.cancel();
                     if (computerchess.row < 0 || computerchess.row >= BlockNum || computerchess.col < 0 || computerchess.col >= BlockNum)
                     {
                         DrawChessAgain();
@@ -259,6 +270,18 @@ public class GameView extends View {
                 , 2000, 1000);
     }
 
+    private void InitComputerRun()
+    {
+        timer_analyze = new Timer();
+        timer_analyze.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Message message = new Message();
+                message.what = 1;
+                handler_analyze.sendMessage(message);
+            }
+        },2000,1000);
+    }
     private void ComputerRun()
     {
         flashnum = 0;
@@ -275,15 +298,15 @@ public class GameView extends View {
         computerchess = bwAlgorithm.GetBestChessPlaceAfterAnalyze(Computer_Role);
         if (computerchess.result > 0)
         {
-            timer_computer = new Timer();
-            timer_computer.schedule(new TimerTask(){
+            timer_flashchess = new Timer();
+            timer_flashchess.schedule(new TimerTask(){
                 @Override
                 public void run() {
                     Message message = new Message();
                     message.what = ++flashnum;
                     message.arg1 = computerchess.row;
                     message.arg2 = computerchess.col;
-                    handler_computer.sendMessage(message);
+                    handler_flashchess.sendMessage(message);
                 }
             },1000,1000);
         }
@@ -486,10 +509,12 @@ public class GameView extends View {
     private int flashnum = 0;
     private int ComputerTurnChessCount = 0;
     private int PeopleTurnChessCount = 0;
-    private Handler handler_computer;
+    private Handler handler_flashchess;
     private Handler handler_time;
-    private Timer timer_computer;
+    private Handler handler_analyze;
+    private Timer timer_flashchess;
     private Timer timer_game;
+    private Timer timer_analyze;
     private PositionResult computerchess = new PositionResult();
     private Bitmap bitmap_black = null;
     private Bitmap bitmap_white = null;
