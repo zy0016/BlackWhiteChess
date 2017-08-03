@@ -280,7 +280,7 @@ public class GameView extends View {
                 message.what = 1;
                 handler_analyze.sendMessage(message);
             }
-        },2000,1000);
+        },1000,1000);
     }
     private void ComputerRun()
     {
