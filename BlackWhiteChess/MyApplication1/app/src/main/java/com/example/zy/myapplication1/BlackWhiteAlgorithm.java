@@ -379,10 +379,13 @@ public class BlackWhiteAlgorithm {
                    ((toplineleft > 0 || toplineright > 0) && sc[0][0].ct == Chessman.ChessmanType.NONE && sc[0][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
                     )
                 {
-                    result.col = col;
-                    result.row = 0;
-                    result.result = toplineleft + toplineright;
-                    resultlist.add(result);
+                    if (!(toplineleft > 0 && toplineright > 0 && sc[0][0].ct == Chessman.ChessmanType.NONE && sc[0][BlockNum - 1].ct == Chessman.ChessmanType.NONE))
+                    {
+                        result.col = col;
+                        result.row = 0;
+                        result.result = toplineleft + toplineright;
+                        resultlist.add(result);
+                    }
                 }
             }
             if (sc[BlockNum - 1][col].ct == Chessman.ChessmanType.NONE)
@@ -394,10 +397,13 @@ public class BlackWhiteAlgorithm {
                    ((bottomlinelet > 0 || bottomlineright > 0) && sc[BlockNum - 1][0].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
                         )
                 {
-                    result.col = col;
-                    result.row = BlockNum - 1;
-                    result.result = bottomlinelet + bottomlineright;
-                    resultlist.add(result);
+                    if (!(bottomlinelet > 0 && bottomlineright > 0 && sc[BlockNum - 1][0].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][BlockNum - 1].ct == Chessman.ChessmanType.NONE))
+                    {
+                        result.col = col;
+                        result.row = BlockNum - 1;
+                        result.result = bottomlinelet + bottomlineright;
+                        resultlist.add(result);
+                    }
                 }
             }
         }
@@ -412,10 +418,13 @@ public class BlackWhiteAlgorithm {
                    ((leftlineup > 0 || leftlinedown > 0) && sc[0][0].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][0].ct == Chessman.ChessmanType.NONE)
                         )
                 {
-                    result.col = 0;
-                    result.row = row;
-                    result.result = leftlineup + leftlinedown;
-                    resultlist.add(result);
+                    if (!(leftlineup > 0 && leftlinedown > 0 && sc[0][0].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][0].ct == Chessman.ChessmanType.NONE))
+                    {
+                        result.col = 0;
+                        result.row = row;
+                        result.result = leftlineup + leftlinedown;
+                        resultlist.add(result);
+                    }
                 }
             }
             if (sc[row][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
@@ -427,10 +436,13 @@ public class BlackWhiteAlgorithm {
                    ((rightlineup > 0 || rightlinedown > 0) && sc[0][BlockNum - 1].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][BlockNum - 1].ct == Chessman.ChessmanType.NONE)
                         )
                 {
-                    result.col = BlockNum - 1;
-                    result.row = row;
-                    result.result = rightlineup + rightlinedown;
-                    resultlist.add(result);
+                    if (!(rightlineup > 0 && rightlinedown > 0 && sc[0][BlockNum - 1].ct == Chessman.ChessmanType.NONE && sc[BlockNum - 1][BlockNum - 1].ct == Chessman.ChessmanType.NONE))
+                    {
+                        result.col = BlockNum - 1;
+                        result.row = row;
+                        result.result = rightlineup + rightlinedown;
+                        resultlist.add(result);
+                    }
                 }
             }
         }
