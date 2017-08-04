@@ -155,9 +155,56 @@ public class BlackWhiteAlgorithm {
         UpdateCWPWeightStatusForLevel6(blockstatus);
         UpdateCWPWeightStatusForLevel7();
     }
+
+    private PositionResult HandleEmergencyStatus(Chessman.ChessmanType blockstatus)
+    {
+        int  iEnemyHasMaxWeightPositionsOld = 0,iEnemyHasMaxWeightPositionsNew = 0;
+        Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
+        PositionResult result = new PositionResult();
+        result.result = -1;
+        BackupChessman2();
+        for (int row = 0;row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                if (CanPutChessInPosition(row,col,blockstatus))
+                {
+                    RestoreChessman2();
+                    iEnemyHasMaxWeightPositionsOld = GetMaxWeightPositionCount(enemychess);
+                    if (GetTurnChessResult(blockstatus, col, row) > 0)
+                    {
+                        iEnemyHasMaxWeightPositionsNew = GetMaxWeightPositionCount(enemychess);
+                        if (iEnemyHasMaxWeightPositionsOld > iEnemyHasMaxWeightPositionsNew)
+                        {
+                            RestoreChessman2();
+                            result.row = row;
+                            result.col = col;
+                            result.result = GetWinChessNum(blockstatus,col,row);
+                            result.Text = "HandleEmergencyStatus";
+                            return result;
+                        }
+                    }
+                }
+            }
+        }
+        RestoreChessman2();
+        return result;
+    }
+
     public PositionResult GetBestChessPlaceAfterAnalyze(Chessman.ChessmanType blockstatus)
     {
+        Chessman.ChessmanType enemychess = (blockstatus == Chessman.ChessmanType.WHITE) ? Chessman.ChessmanType.BLACK : Chessman.ChessmanType.WHITE;
         UpdateCWpWeightStatus(blockstatus);
+
+        if (GetMaxWeightPositionCount(enemychess) > 0)
+        {
+            PositionResult emergency_result = HandleEmergencyStatus(blockstatus);
+            if (emergency_result.result != -1)
+            {
+                return emergency_result;
+            }
+        }
+
         PositionResult result_weight = AnalyzeWeightBalance(blockstatus);
         int row = result_weight.row;
         int col = result_weight.col;
