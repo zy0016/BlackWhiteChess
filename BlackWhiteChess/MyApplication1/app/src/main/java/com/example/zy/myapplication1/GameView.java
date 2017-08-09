@@ -31,7 +31,8 @@ public class GameView extends View {
         minute = 0;
         ComputerTurnChessCount = 0;
         PeopleTurnChessCount = 0;
-
+        bCanDisplayRegretButton = false;
+        bCanDoRegrect = false;
         initGameView(context,gridtype);
 
         bwAlgorithm = new BlackWhiteAlgorithm(chessman,BlockNum);
@@ -64,8 +65,11 @@ public class GameView extends View {
         bitmap_black = BitmapFactory.decodeResource(getResources(),R.drawable.chess_black);
         bitmap_white = BitmapFactory.decodeResource(getResources(),R.drawable.chess_white);
         bitmap_orange = BitmapFactory.decodeResource(getResources(),R.drawable.chess_orange);
+        bitmap_back = BitmapFactory.decodeResource(getResources(),R.drawable.back);
         bh = bitmap_black.getHeight();
         bw = bitmap_black.getWidth();
+        back_button_w = bitmap_back.getWidth();
+        back_button_h = bitmap_back.getHeight();
     }
     private void InitChessGrid(int gridtype)
     {
@@ -97,6 +101,39 @@ public class GameView extends View {
             chessman[BlockNum / 2][BlockNum / 2 - 1].ct = Chessman.ChessmanType.WHITE;
             chessman[BlockNum / 2][BlockNum  /2].ct = Chessman.ChessmanType.BLACK;
         }
+        ////////////////////////////////
+        chessman_regret = new Chessman[BlockNum][BlockNum];
+        for (int row = 0;row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                chessman_regret[row][col] = new Chessman();
+                chessman_regret[row][col].ct = chessman[row][col].ct;
+            }
+        }
+    }
+
+    private void SaveRegretChess()
+    {
+        for (int row = 0;row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                chessman_regret[row][col].ct = chessman[row][col].ct;
+            }
+        }
+    }
+    private void RegretChess()
+    {
+        for (int row = 0;row < BlockNum;row++)
+        {
+            for (int col = 0;col < BlockNum;col++)
+            {
+                chessman[row][col].ct = chessman_regret[row][col].ct;
+            }
+        }
+        bwAlgorithm.UpdateChessman(chessman);
+        DrawChessAgain();
     }
 
     @Override
@@ -110,6 +147,7 @@ public class GameView extends View {
         DrawChessText(canvas);
         DrawChessGrid(canvas);
         DrawChessman(canvas);
+        DrawBackButton(canvas);
     }
 
     @Override
@@ -132,8 +170,7 @@ public class GameView extends View {
             StartGameTimer();
             int x = Math.round(event.getX());
             int y = Math.round(event.getY());
-            PositionResult userchess = new PositionResult();
-            userchess = GetChessRowCol(x,y);
+            PositionResult userchess = GetChessRowCol(x,y);
             if (userchess.col != -1 && userchess.row != -1)
             {
                 if (bwAlgorithm.CanPutChessInPosition(userchess.row,userchess.col,People_Role))//user can put chess for current grid
@@ -155,11 +192,15 @@ public class GameView extends View {
                             DrawChessAgain();
                             return true;
                         }
-                        //ComputerRun();
                         InitComputerRun();
                         soundPool.play(1,3, 3, 0, 0, 1);
                     }
                 }
+            }
+            else if (IsBackButtonArea(x,y) && bCanDoRegrect)
+            {
+                //press back button.
+                RegretChess();
             }
         }
         DrawChessAgain();
@@ -212,6 +253,10 @@ public class GameView extends View {
                         return;
                     }
                     Current_Player = CURRENT_PLAYER.PEOPLE;
+                    /////////////////////////////
+                    SaveRegretChess();
+                    bCanDoRegrect = true;
+                    bCanDisplayRegretButton = true;
                 }
                 else
                 {
@@ -272,6 +317,7 @@ public class GameView extends View {
 
     private void InitComputerRun()
     {
+        bCanDoRegrect = false;
         timer_analyze = new Timer();
         timer_analyze.schedule(new TimerTask() {
             @Override
@@ -315,6 +361,12 @@ public class GameView extends View {
             ClearOrange();
         }
     }
+    
+    private boolean IsBackButtonArea(int x,int y)
+    {
+        return (back_button_x < x && x < back_button_x + back_button_w) && (back_button_y < y && y < back_button_y + back_button_h);
+    }
+    
     private PositionResult GetChessRowCol(int x,int y)
     {
         PositionResult p = new PositionResult();
@@ -379,6 +431,14 @@ public class GameView extends View {
         if (computerchess != null && computerchess.Text != null && computerchess.Text.length() > 0)
         {
             canvas.drawText(computerchess.Text,text_debug_data_x,text_debug_data_y2,paint);
+        }
+    }
+    private void DrawBackButton(Canvas canvas)
+    {
+        if (bCanDisplayRegretButton)
+        {
+            Paint paint = new Paint();
+            canvas.drawBitmap(bitmap_back,back_button_x,back_button_y,paint);    
         }
     }
     private void DrawChessman(Canvas canvas)
@@ -504,11 +564,17 @@ public class GameView extends View {
     private final int text_debug_data_x = 20;
     private final int text_debug_data_y = 100;
     private final int text_debug_data_y2 = 600;
+    private final int back_button_x = 40;
+    private final int back_button_y = 40;
+    private int back_button_w = 0;
+    private int back_button_h = 0;
     private int bh = 0;
     private int bw = bh;
     private int flashnum = 0;
     private int ComputerTurnChessCount = 0;
     private int PeopleTurnChessCount = 0;
+    private boolean bCanDisplayRegretButton = false;
+    private boolean bCanDoRegrect = false;
     private Handler handler_flashchess;
     private Handler handler_time;
     private Handler handler_analyze;
@@ -519,7 +585,9 @@ public class GameView extends View {
     private Bitmap bitmap_black = null;
     private Bitmap bitmap_white = null;
     private Bitmap bitmap_orange = null;
+    private Bitmap bitmap_back = null;
     private Chessman[][] chessman = null;
+    private Chessman[][] chessman_regret = null;
     private BlackWhiteAlgorithm bwAlgorithm;
     public enum CURRENT_PLAYER  {PEOPLE,COMPUTER};
     private CURRENT_PLAYER Current_Player = CURRENT_PLAYER.PEOPLE;
